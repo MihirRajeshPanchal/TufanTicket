@@ -2,9 +2,14 @@ import EventForm from "@/components/shared/EventForm"
 import { auth } from "@clerk/nextjs";
 
 const CreateEvent = () => {
-  const { sessionClaims } = auth();
+  const { userId } = auth() || {};
 
-  const userId = sessionClaims?.userId as string;
+  if (!userId) {
+    console.error("User ID is undefined. Please ensure the user is authenticated.");
+    return <div>Error: User not authenticated</div>;
+  }else{
+    console.log(userId.toString())
+  }
 
   return (
     <>
@@ -13,7 +18,7 @@ const CreateEvent = () => {
       </section>
 
       <div className="wrapper my-8">
-        <EventForm userId={userId} type="Create" />
+        <EventForm userId={userId.toString()} type="Create" />
       </div>
     </>
   )

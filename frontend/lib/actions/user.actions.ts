@@ -11,6 +11,7 @@ import { handleError } from '@/lib/utils'
 import { CreateUserParams, UpdateUserParams } from '@/types'
 
 export async function createUser(user: CreateUserParams) {
+  console.log(user)
   try {
     console.log('createUser function called with:', user);
 

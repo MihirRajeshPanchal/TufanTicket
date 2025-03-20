@@ -68,6 +68,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           userId,
           path: '/profile'
         })
+        console.log("EVENT: ", newEvent)
 
         if(newEvent) {
           form.reset();

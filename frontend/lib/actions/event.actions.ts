@@ -27,15 +27,41 @@ const populateEvent = (query: any) => {
     .populate({ path: 'category', model: Category, select: '_id name' })
 }
 
+// Function to handle Clerk to MongoDB ID mapping
+const getUserByClerkId = async (clerkId: string) => {
+  try {
+    // Assuming you have a clerkId field in your User model
+    const user = await User.findOne({ clerkId })
+    if (!user) throw new Error('User not found')
+    return user
+  } catch (error) {
+    handleError(error)
+  }
+}
+
 // CREATE
 export async function createEvent({ userId, event, path }: CreateEventParams) {
   try {
     await connectToDatabase()
 
-    const organizer = await User.findById(userId)
+    // Check if userId is a Clerk ID (not a MongoDB ObjectId)
+    let organizer;
+    if (userId.startsWith('user_')) {
+      // It's a Clerk ID, find the corresponding MongoDB user
+      organizer = await getUserByClerkId(userId)
+    } else {
+      // Try to find as normal ObjectId
+      organizer = await User.findById(userId)
+    }
+
     if (!organizer) throw new Error('Organizer not found')
 
-    const newEvent = await Event.create({ ...event, category: event.categoryId, organizer: userId })
+    const newEvent = await Event.create({ 
+      ...event, 
+      category: event.categoryId, 
+      organizer: organizer._id // Use the MongoDB ObjectId
+    })
+    
     revalidatePath(path)
 
     return JSON.parse(JSON.stringify(newEvent))
@@ -63,10 +89,21 @@ export async function getEventById(eventId: string) {
 export async function updateEvent({ userId, event, path }: UpdateEventParams) {
   try {
     await connectToDatabase()
+    
+    // Get the MongoDB user
+    let organizer;
+    if (userId.startsWith('user_')) {
+      organizer = await getUserByClerkId(userId)
+      if (!organizer) throw new Error('User not found')
+      userId = organizer._id.toString(); // Convert to string for comparison
+    }
 
     const eventToUpdate = await Event.findById(event._id)
-    if (!eventToUpdate || eventToUpdate.organizer.toHexString() !== userId) {
-      throw new Error('Unauthorized or event not found')
+    if (!eventToUpdate) throw new Error('Event not found')
+    
+    // Compare the organizer IDs
+    if (eventToUpdate.organizer.toString() !== userId) {
+      throw new Error('Unauthorized: You are not the organizer of this event')
     }
 
     const updatedEvent = await Event.findByIdAndUpdate(
@@ -94,7 +131,38 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
   }
 }
 
-// GET ALL EVENTS
+// GET EVENTS BY ORGANIZER
+export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
+  try {
+    await connectToDatabase()
+
+    let organizerId = userId;
+    
+    // If it's a Clerk ID, find the corresponding MongoDB user
+    if (userId.startsWith('user_')) {
+      const organizer = await getUserByClerkId(userId)
+      if (!organizer) throw new Error('User not found')
+      organizerId = organizer._id;
+    }
+
+    const conditions = { organizer: organizerId }
+    const skipAmount = (page - 1) * limit
+
+    const eventsQuery = Event.find(conditions)
+      .sort({ createdAt: 'desc' })
+      .skip(skipAmount)
+      .limit(limit)
+
+    const events = await populateEvent(eventsQuery)
+    const eventsCount = await Event.countDocuments(conditions)
+
+    return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+  } catch (error) {
+    handleError(error)
+  }
+}
+
+// GET ALL EVENTS (unchanged)
 export async function getAllEvents({ query, limit = 6, page, category }: GetAllEventsParams) {
   try {
     await connectToDatabase()
@@ -123,29 +191,7 @@ export async function getAllEvents({ query, limit = 6, page, category }: GetAllE
   }
 }
 
-// GET EVENTS BY ORGANIZER
-export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
-  try {
-    await connectToDatabase()
-
-    const conditions = { organizer: userId }
-    const skipAmount = (page - 1) * limit
-
-    const eventsQuery = Event.find(conditions)
-      .sort({ createdAt: 'desc' })
-      .skip(skipAmount)
-      .limit(limit)
-
-    const events = await populateEvent(eventsQuery)
-    const eventsCount = await Event.countDocuments(conditions)
-
-    return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
-  } catch (error) {
-    handleError(error)
-  }
-}
-
-// GET RELATED EVENTS: EVENTS WITH SAME CATEGORY
+// GET RELATED EVENTS (unchanged)
 export async function getRelatedEventsByCategory({
   categoryId,
   eventId,

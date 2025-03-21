@@ -14,6 +14,7 @@ export interface IEvent extends Document {
   url?: string;
   category: { _id: string, name: string }
   organizer: { _id: string, firstName: string, lastName: string }
+  photos: { url: string }[]
 }
 
 const EventPhotoSchema = new Schema({
@@ -33,7 +34,9 @@ const EventSchema = new Schema({
   url: { type: String },
   category: { type: Schema.Types.ObjectId, ref: 'Category' },
   organizer: { type: Schema.Types.ObjectId, ref: 'User' },
-  photos: [EventPhotoSchema]
+  photos: [{
+    url: { type: String, required: true }
+  }]
 }, {
   timestamps: true
 })

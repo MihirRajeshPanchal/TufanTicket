@@ -244,15 +244,16 @@ export async function getEventPhotos(eventId: string) {
   try {
     await connectToDatabase()
     
-    const eventPhotos = await EventPhoto.findOne({ eventId }).lean()
-    console.log('Found event photos:', eventPhotos) // Debug log
+    const event = await Event.findById(eventId)
+      .select('photos')
+      .lean()
     
-    if (!eventPhotos) {
+    if (!event || !event.photos) {
       return []
     }
 
-    // Make sure we're returning an array of photo URLs
-    return JSON.parse(JSON.stringify(eventPhotos.photos || []))
+    const photoUrls = event.photos.map(photo => photo.url)
+    return JSON.parse(JSON.stringify(photoUrls))
   } catch (error) {
     console.error('Error fetching event photos:', error)
     return []
@@ -298,33 +299,30 @@ export async function getEventComments(eventId: string) {
   try {
     await connectToDatabase()
     
-    const comments = await Comment.findOne({ eventId })
+    const commentDoc = await Comment.findOne({ eventId })
       .populate({
         path: 'comments.userId',
         model: User,
-        select: '_id firstName lastName username photo clerkId'
+        select: '_id firstName lastName photo username'
       })
       .lean()
     
-    console.log('Fetched comments with user data:', comments); // Debug log
-
-    if (!comments) {
+    if (!commentDoc || !commentDoc.comments) {
       return []
     }
 
-    // Transform the data to match the expected format
-    const formattedComments = comments.comments.map(comment => ({
+    const formattedComments = commentDoc.comments.map(comment => ({
       _id: comment._id.toString(),
       userId: {
         _id: comment.userId._id.toString(),
-        firstName: comment.userId.firstName,
-        lastName: comment.userId.lastName,
-        username: comment.userId.username,
-        photo: comment.userId.photo || '/assets/icons/profile-placeholder.svg'
+        firstName: comment.userId.firstName || '',
+        lastName: comment.userId.lastName || '',
+        photo: comment.userId.photo || '/assets/icons/profile-placeholder.svg',
+        username: comment.userId.username || ''
       },
       text: comment.text,
       createdAt: comment.createdAt
-    }));
+    }))
 
     return JSON.parse(JSON.stringify(formattedComments))
   } catch (error) {
@@ -347,7 +345,6 @@ export async function addEventComment({
   try {
     await connectToDatabase()
 
-    // Get the user data first
     const user = await User.findById(userId).lean()
     if (!user) throw new Error('User not found')
 
@@ -369,21 +366,23 @@ export async function addEventComment({
     ).populate({
       path: 'comments.userId',
       model: User,
-      select: '_id firstName lastName username photo'
+      select: '_id firstName lastName photo username'
     })
 
-    // Get the newly added comment
+    if (!result || !result.comments || result.comments.length === 0) {
+      throw new Error('Failed to add comment')
+    }
+
     const newComment = result.comments[result.comments.length - 1]
     
-    // Format the comment to match the expected structure
     const formattedComment = {
       _id: newComment._id.toString(),
       userId: {
         _id: user._id.toString(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        photo: user.photo || '/assets/icons/profile-placeholder.svg'
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        photo: user.photo || '/assets/icons/profile-placeholder.svg',
+        username: user.username || ''
       },
       text: newComment.text,
       createdAt: newComment.createdAt

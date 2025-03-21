@@ -150,13 +150,57 @@ export type SearchParamProps = {
 }
 
 // Add this to your existing types
-interface IEventPhoto {
-  _id?: string;
+export interface IUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  username?: string;
+  photo?: string;
+  clerkId?: string;
+}
+
+export interface IComment {
+  _id: string;
+  userId: IUser;
+  text: string;
+  createdAt: Date;
+}
+
+export interface IEventPhoto {
   url: string;
 }
 
-// Update IEvent interface to include photos
-interface IEvent {
-  // ... existing event fields ...
+export interface IEvent {
+  _id: string;
+  title: string;
+  description?: string;
+  location?: string;
+  createdAt: Date;
+  imageUrl: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  price: string;
+  isFree: boolean;
+  url?: string;
+  category: { _id: string; name: string };
+  organizer: IUser;
   photos: IEventPhoto[];
+}
+
+// Update your EventPhotoGallery props interface
+export interface EventPhotoGalleryProps {
+  eventId: string;
+  photos: string[];
+}
+
+// Update your EventComments props interface
+export interface EventCommentsProps {
+  eventId: string;
+  currentUser: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    photo: string;
+  };
+  comments: IComment[];
 }

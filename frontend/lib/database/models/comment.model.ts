@@ -1,4 +1,5 @@
 import { Schema, model, models } from "mongoose";
+import { IComment } from "@/types";
 
 const CommentSchema = new Schema({
   eventId: { 

@@ -10,3 +10,11 @@
     6. Whatsapp/Email New Events
 7. How many people going to the event
     8. Event Recommendations
+
+9. Share Button gallery and event as well
+10. Ribbon
+11. Trend Graph (Button)
+12. Like and Dislike Button
+13. Add event to calendar
+14. Photo Collage
+15. blinking Feature

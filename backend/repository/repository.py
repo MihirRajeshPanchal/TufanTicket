@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from pydantic import BaseModel
 from typing import Optional, Tuple, TypeVar, Any, Dict, List
-from backend.utils.serialization import convert_objectid_to_str  # Import the helper function
+from backend.utils.serialization import convert_objectid_to_str  
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -25,7 +25,7 @@ class MongoDBClient:
         collection = self._get_collection(collection_name)
         document = collection.find_one({"_id": ObjectId(document_id)})
         if document:
-            document = convert_objectid_to_str(document)  # Convert all ObjectIds
+            document = convert_objectid_to_str(document)  
         return document
 
     def read_by_key_value(self, collection_name: str, key: str, value: Any) -> List[Dict[str, Any]]:
@@ -34,7 +34,7 @@ class MongoDBClient:
             documents = collection.find({key: value})
             result = []
             for doc in documents:
-                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
+                result.append(convert_objectid_to_str(doc))  
             return result
         except Exception as e:
             return None
@@ -49,7 +49,7 @@ class MongoDBClient:
             documents = collection.find({key: value})
             result = []
             for doc in documents:
-                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
+                result.append(convert_objectid_to_str(doc))  
             return result
         except Exception as e:
             return None
@@ -60,7 +60,7 @@ class MongoDBClient:
             documents = collection.find({key1: value1, key2: value2})
             result = []
             for doc in documents:
-                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
+                result.append(convert_objectid_to_str(doc))  
             return result
         except Exception as e:
             return None
@@ -84,7 +84,7 @@ class MongoDBClient:
         documents = collection.find()
         result = []
         for doc in documents:
-            result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
+            result.append(convert_objectid_to_str(doc))  
             
         return result
     
@@ -94,7 +94,7 @@ class MongoDBClient:
             documents = collection.find(query).sort('created_at', 1).limit(limit)
             result = []
             for doc in documents:
-                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
+                result.append(convert_objectid_to_str(doc))  
             return result
         except Exception as e:
             return []
@@ -108,7 +108,7 @@ class MongoDBClient:
             document = collection.find_one(query, sort=sort)
             
             if document:
-                document = convert_objectid_to_str(document)  # Convert all ObjectIds
+                document = convert_objectid_to_str(document)  
             
             return document
         except Exception as e:
@@ -127,12 +127,12 @@ class MongoDBClient:
             if len(documents) == 0:
                 return []
             elif len(documents) == 1:
-                document = convert_objectid_to_str(documents[0])  # Convert all ObjectIds
+                document = convert_objectid_to_str(documents[0])  
                 return [document, document]
 
             result = []
             for document in documents:
-                result.append(convert_objectid_to_str(document))  # Convert all ObjectIds
+                result.append(convert_objectid_to_str(document))  
             
             return result
         

@@ -2,13 +2,14 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from pydantic import BaseModel
 from typing import Optional, Tuple, TypeVar, Any, Dict, List
+from backend.utils.serialization import convert_objectid_to_str  # Import the helper function
 
 T = TypeVar("T", bound=BaseModel)
 
 
 class MongoDBClient:
     def __init__(self, database_url: str, database_name: str):
-        self.client = MongoClient(database_url,tls=True,tlsAllowInvalidCertificates=True)
+        self.client = MongoClient(database_url, tls=True, tlsAllowInvalidCertificates=True)
         self.db = self.client[database_name]
 
     def _get_collection(self, collection_name: str):
@@ -24,7 +25,7 @@ class MongoDBClient:
         collection = self._get_collection(collection_name)
         document = collection.find_one({"_id": ObjectId(document_id)})
         if document:
-            document["_id"] = str(document["_id"]) 
+            document = convert_objectid_to_str(document)  # Convert all ObjectIds
         return document
 
     def read_by_key_value(self, collection_name: str, key: str, value: Any) -> List[Dict[str, Any]]:
@@ -33,8 +34,7 @@ class MongoDBClient:
             documents = collection.find({key: value})
             result = []
             for doc in documents:
-                doc["_id"] = str(doc["_id"])
-                result.append(doc)
+                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
             return result
         except Exception as e:
             return None
@@ -49,20 +49,18 @@ class MongoDBClient:
             documents = collection.find({key: value})
             result = []
             for doc in documents:
-                doc["_id"] = str(doc["_id"])  
-                result.append(doc)
+                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
             return result
         except Exception as e:
             return None
         
-    def read_multiple_by_key_value(self, collection_name: str, key1: str, value1: Any,  key2: str, value2: Any) -> List[Dict[str, Any]]:
+    def read_multiple_by_key_value(self, collection_name: str, key1: str, value1: Any, key2: str, value2: Any) -> List[Dict[str, Any]]:
         try:
             collection = self._get_collection(collection_name)
             documents = collection.find({key1: value1, key2: value2})
             result = []
             for doc in documents:
-                doc["_id"] = str(doc["_id"])
-                result.append(doc)
+                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
             return result
         except Exception as e:
             return None
@@ -86,8 +84,8 @@ class MongoDBClient:
         documents = collection.find()
         result = []
         for doc in documents:
-            doc["_id"] = str(doc["_id"])
-            result.append(doc)
+            result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
+            
         return result
     
     def find(self, collection_name: str, query: Dict[str, Any], limit: int = 0) -> List[Dict[str, Any]]:
@@ -96,8 +94,7 @@ class MongoDBClient:
             documents = collection.find(query).sort('created_at', 1).limit(limit)
             result = []
             for doc in documents:
-                doc["_id"] = str(doc["_id"])
-                result.append(doc)
+                result.append(convert_objectid_to_str(doc))  # Convert all ObjectIds
             return result
         except Exception as e:
             return []
@@ -111,7 +108,7 @@ class MongoDBClient:
             document = collection.find_one(query, sort=sort)
             
             if document:
-                document["_id"] = str(document["_id"])
+                document = convert_objectid_to_str(document)  # Convert all ObjectIds
             
             return document
         except Exception as e:
@@ -130,14 +127,14 @@ class MongoDBClient:
             if len(documents) == 0:
                 return []
             elif len(documents) == 1:
-                document = documents[0]
-                document["_id"] = str(document["_id"])
+                document = convert_objectid_to_str(documents[0])  # Convert all ObjectIds
                 return [document, document]
 
+            result = []
             for document in documents:
-                document["_id"] = str(document["_id"])
+                result.append(convert_objectid_to_str(document))  # Convert all ObjectIds
             
-            return documents
+            return result
         
         except Exception as e:
             print(f"Error in find_last_two: {e}")

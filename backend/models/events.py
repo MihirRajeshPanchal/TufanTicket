@@ -1,25 +1,16 @@
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
-class Organizer(BaseModel):
-    _id: str
-    firstName: str
-    lastName: str
-
-class Category(BaseModel):
-    _id: str
-    name: str
-
 class Event(BaseModel):
-    id: str = Field(alias="_id")
+    id: str
     title: str
-    description: str
-    price: str
-    isFree: bool
-    imageUrl: str
-    location: str
+    description: Optional[str] = None
+    location: Optional[str] = None
+    imageUrl: Optional[str] = None
     startDateTime: datetime
     endDateTime: datetime
-    url: str
-    organizer: str
-    category: str
+    isFree: bool
+    url: Optional[str] = None
+    categoryId: Optional[str] = None
+    organizerId: Optional[str] = None

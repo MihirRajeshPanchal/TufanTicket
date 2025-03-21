@@ -26,16 +26,21 @@ export async function createUser(user: CreateUserParams) {
   }
 }
 
-export async function getUserById(userId: string) {
+export async function getUserById(clerkId: string) {
   try {
-    await connectToDatabase()
+    await connectToDatabase();
 
-    const user = await User.findById(userId)
+    const user = await User.findOne({ clerkId }).select('_id firstName lastName username photo').lean();
 
-    if (!user) throw new Error('User not found')
-    return JSON.parse(JSON.stringify(user))
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    console.log('Found user:', user); // Debug log
+    return JSON.parse(JSON.stringify(user));
   } catch (error) {
-    handleError(error)
+    console.error('Error fetching user:', error);
+    throw error;
   }
 }
 
@@ -43,7 +48,7 @@ export async function getUserByClerkId(clerkId: string) {
   try {
     await connectToDatabase();
     
-    const user = await User.findOne({ clerkId: clerkId });
+    const user = await User.findOne({ clerkId });
     
     return user;
   } catch (error) {

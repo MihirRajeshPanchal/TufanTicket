@@ -1,15 +1,33 @@
 import CheckoutButton from '@/components/shared/CheckoutButton';
 import Collection from '@/components/shared/Collection';
-import { getEventById, getRelatedEventsByCategory, getEventPhotos } from '@/lib/actions/event.actions'
+import { getEventById, getRelatedEventsByCategory, getEventPhotos, getEventComments } from '@/lib/actions/event.actions'
 import { formatDateTime } from '@/lib/utils';
 import { SearchParamProps } from '@/types'
 import Image from 'next/image';
 import EventPhotoGallery from '@/components/shared/EventPhotoGallery'
+import EventComments from '@/components/shared/EventComments'
+import { auth } from "@clerk/nextjs";
+import { getUserById } from "@/lib/actions/user.actions";
 
 const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) => {
+  const { userId } = auth();
+  
+  // Get event and other data
   const event = await getEventById(id);
   const photos = await getEventPhotos(id);
+  const comments = await getEventComments(id);
   
+  // Get current user data with error handling
+  let currentUser = null;
+  if (userId) {
+    try {
+      currentUser = await getUserById(userId);
+      console.log('Current user data:', currentUser); // Debug log
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  }
+
   console.log('Fetched photos for event:', photos) // Debug log
 
   const relatedEvents = await getRelatedEventsByCategory({
@@ -86,27 +104,49 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
         </div>
       </section>
 
-      {/* Photo Gallery Section */}
-      <section className="wrapper my-8 flex flex-col gap-8 md:gap-12">
-        <EventPhotoGallery 
-          eventId={event._id}
-          photos={eventPhotos}
-        />
-      </section>
+      {/* Photo Gallery and Comments Sections Container */}
+      <div className="wrapper my-8">
+        {/* Photo Gallery Section */}
+        <section className="mb-8">
+          <EventPhotoGallery 
+            eventId={event._id}
+            photos={eventPhotos}
+          />
+        </section>
 
-      {/* Related Events Section */}
-      <section className="wrapper my-8 flex flex-col gap-8 md:gap-12">
-        <h2 className="h2-bold">Related Events</h2>
-        <Collection 
-          data={relatedEvents?.data}
-          emptyTitle="No Events Found"
-          emptyStateSubtext="Come back later"
-          collectionType="All_Events"
-          limit={3}
-          page={searchParams.page as string}
-          totalPages={relatedEvents?.totalPages}
-        />
-      </section>
+        {/* Related Events Section */}
+        <section className="mb-8">
+          <h2 className="h2-bold mb-6">Related Events</h2>
+          <Collection 
+            data={relatedEvents?.data}
+            emptyTitle="No Events Found"
+            emptyStateSubtext="Come back later"
+            collectionType="All_Events"
+            limit={3}
+            page={searchParams.page as string}
+            totalPages={relatedEvents?.totalPages}
+          />
+        </section>
+
+        {/* Comments Section */}
+        <section className="max-w-4xl">
+          <div className="border rounded-xl">
+            <div className="p-6">
+              <h3 className="text-xl font-semibold mb-6">All Discussions</h3>
+              
+              {currentUser ? (
+                <EventComments 
+                  eventId={event._id}
+                  currentUser={currentUser}
+                  comments={comments}
+                />
+              ) : (
+                <p className="text-gray-600 text-center">Please sign in to join the discussion.</p>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
     </>
   )
 }

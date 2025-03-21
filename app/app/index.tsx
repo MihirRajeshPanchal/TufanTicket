@@ -14,7 +14,7 @@ export default function Home() {
     </>
   );
 }
- 
+  
 const styles = StyleSheet.create({
   webviewContainer: {
     flex: 1,

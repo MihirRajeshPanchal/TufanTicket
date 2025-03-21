@@ -1,9 +1,12 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 class User(BaseModel):
-    clerk_id: str
-    first_name: str
-    last_name: str
+    id: str = Field(alias="_id")
+    clerkId: str 
+    firstName: str
+    lastName: str
     username: str
     email: EmailStr
     photo: str
+    class Config:
+        populate_by_name = True 

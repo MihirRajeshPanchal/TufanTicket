@@ -132,7 +132,7 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
 }
 
 // GET EVENTS BY ORGANIZER
-export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
+export async function getEventsByUser({ userId, limit = 30, page }: GetEventsByUserParams) {
   try {
     await connectToDatabase()
 

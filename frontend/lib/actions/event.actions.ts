@@ -169,7 +169,7 @@ export async function getEventsByUser({ userId, limit = 30, page }: GetEventsByU
 }
 
 // GET ALL EVENTS (unchanged)
-export async function getAllEvents({ query, limit = 6, page, category }: GetAllEventsParams) {
+export async function getAllEvents({ query, limit = 40, page, category }: GetAllEventsParams) {
   try {
     await connectToDatabase()
 

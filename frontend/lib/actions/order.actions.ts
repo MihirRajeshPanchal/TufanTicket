@@ -146,3 +146,19 @@ export async function getOrdersByUser({ userId, limit = 3, page }: GetOrdersByUs
     handleError(error)
   }
 }
+
+export async function getEventParticipantsCount(eventId: string) {
+  try {
+    await connectToDatabase();
+
+    const participantsCount = await Order.countDocuments({
+      eventId: eventId,
+      status: 'PAID' // Only count paid orders
+    });
+
+    return participantsCount;
+  } catch (error) {
+    console.error('Error fetching participants count:', error);
+    return 0;
+  }
+}

@@ -8,6 +8,7 @@ import EventPhotoGallery from '@/components/shared/EventPhotoGallery'
 import EventComments from '@/components/shared/EventComments'
 import { auth } from "@clerk/nextjs";
 import { getUserById } from "@/lib/actions/user.actions";
+import { getEventParticipantsCount } from '@/lib/actions/order.actions'
 
 const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) => {
   const { userId } = auth();
@@ -39,66 +40,144 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
   // Ensure photos array exists
   const eventPhotos = photos || []
 
+  // Get participants count
+  const participantsCount = await getEventParticipantsCount(id);
+
   return (
     <>
-      <section className="flex justify-center bg-primary-50 bg-dotted-pattern bg-contain">
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:max-w-7xl">
-          <Image 
-            src={event.imageUrl}
-            alt="hero image"
-            width={1000}
-            height={1000}
-            className="h-full min-h-[300px] object-cover object-center"
-          />
+      <section className="flex justify-center py-8 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl">
+          <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+              {/* Image Container */}
+              <div className="relative p-4 flex flex-col">
+                <div className="relative h-[400px] w-full rounded-xl overflow-hidden border-8 border-white shadow-inner">
+                  <Image 
+                    src={event.imageUrl}
+                    alt="hero image"
+                    fill
+                    className="object-cover object-center hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                
+                {/* Participants Count Section */}
+                <div className="mt-4 p-4 bg-primary-50 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex -space-x-2">
+                        {/* Sample avatar stack - you can make this dynamic if you have participant avatars */}
+                        {[...Array(3)].map((_, i) => (
+                          <div 
+                            key={i} 
+                            className="w-8 h-8 rounded-full bg-primary-500 border-2 border-white flex items-center justify-center"
+                          >
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        ))}
+                        {participantsCount > 3 && (
+                          <div className="w-8 h-8 rounded-full bg-primary-100 border-2 border-white flex items-center justify-center">
+                            <span className="text-xs text-primary-500 font-medium">
+                              +{participantsCount - 3}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-2">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {participantsCount} {participantsCount === 1 ? 'Participant' : 'Participants'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Have registered for this event
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Live Indicator */}
+                    <div className="flex items-center gap-1">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                      </span>
+                      <span className="text-xs font-medium text-green-600">LIVE</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          <div className="flex w-full flex-col gap-8 p-5 md:p-10">
-            <div className="flex flex-col gap-6">
-              <h2 className='h2-bold'>{event.title}</h2>
+              {/* Content Container */}
+              <div className="flex flex-col gap-6 p-6 md:p-8 bg-white">
+                <div className="flex flex-col gap-4">
+                  <h2 className='text-3xl font-bold text-gray-900'>{event.title}</h2>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="flex gap-3">
-                  <p className="p-bold-20 rounded-full bg-green-500/10 px-5 py-2 text-green-700">
-                    {event.isFree ? 'FREE' : `$${event.price}`}
-                  </p>
-                  <p className="p-medium-16 rounded-full bg-grey-500/10 px-4 py-2.5 text-grey-500">
-                    {event.category.name}
+                  <div className="flex flex-wrap gap-3">
+                    <p className="px-5 py-2 rounded-full bg-green-500/10 text-green-700 font-semibold text-sm">
+                      {event.isFree ? 'FREE' : `$${event.price}`}
+                    </p>
+                    <p className="px-4 py-2 rounded-full bg-primary-50 text-primary-500 font-semibold text-sm">
+                      {event.category.name}
+                    </p>
+                  </div>
+
+                  <p className="text-gray-600">
+                    Organized by{' '}
+                    <span className="text-primary-500 font-semibold">
+                      {event.organizer.firstName} {event.organizer.lastName}
+                    </span>
                   </p>
                 </div>
 
-                <p className="p-medium-18 ml-2 mt-2 sm:mt-0">
-                  by{' '}
-                  <span className="text-primary-500">{event.organizer.firstName} {event.organizer.lastName}</span>
-                </p>
-              </div>
-            </div>
+                <CheckoutButton event={event} />
 
-            <CheckoutButton event={event} />
+                <div className="flex flex-col gap-4 border-t pt-4">
+                  <div className='flex items-start gap-3'>
+                    <Image 
+                      src="/assets/icons/calendar.svg" 
+                      alt="calendar" 
+                      width={24} 
+                      height={24}
+                      className="mt-1"
+                    />
+                    <div className="flex flex-col text-gray-600 text-sm">
+                      <p>
+                        {formatDateTime(event.startDateTime).dateOnly} - {' '}
+                        {formatDateTime(event.startDateTime).timeOnly}
+                      </p>
+                      <p>
+                        {formatDateTime(event.endDateTime).dateOnly} -  {' '}
+                        {formatDateTime(event.endDateTime).timeOnly}
+                      </p>
+                    </div>
+                  </div>
 
-            <div className="flex flex-col gap-5">
-              <div className='flex gap-2 md:gap-3'>
-                <Image src="/assets/icons/calendar.svg" alt="calendar" width={32} height={32} />
-                <div className="p-medium-16 lg:p-regular-20 flex flex-wrap items-center">
-                  <p>
-                    {formatDateTime(event.startDateTime).dateOnly} - {' '}
-                    {formatDateTime(event.startDateTime).timeOnly}
-                  </p>
-                  <p>
-                    {formatDateTime(event.endDateTime).dateOnly} -  {' '}
-                    {formatDateTime(event.endDateTime).timeOnly}
-                  </p>
+                  <div className="flex items-start gap-3">
+                    <Image 
+                      src="/assets/icons/location.svg" 
+                      alt="location" 
+                      width={24} 
+                      height={24}
+                      className="mt-1"
+                    />
+                    <p className="text-gray-600 text-sm">{event.location}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 border-t pt-4">
+                  <h3 className="font-semibold text-gray-900">About the Event:</h3>
+                  <p className="text-gray-600 text-sm line-clamp-3">{event.description}</p>
+                  {event.url && (
+                    <a 
+                      href={event.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-primary-500 text-sm hover:underline truncate"
+                    >
+                      {event.url}
+                    </a>
+                  )}
                 </div>
               </div>
-
-              <div className="p-regular-20 flex items-center gap-3">
-                <Image src="/assets/icons/location.svg" alt="location" width={32} height={32} />
-                <p className="p-medium-16 lg:p-regular-20">{event.location}</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <p className="p-bold-20 text-grey-600">What You'll Learn:</p>
-              <p className="p-medium-16 lg:p-regular-18">{event.description}</p>
-              <p className="p-medium-16 lg:p-regular-18 truncate text-primary-500 underline">{event.url}</p>
             </div>
           </div>
         </div>

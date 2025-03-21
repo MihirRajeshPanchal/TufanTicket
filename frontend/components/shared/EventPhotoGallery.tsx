@@ -78,12 +78,8 @@ const EventPhotoGallery = ({ eventId, photos: initialPhotos }: EventPhotoGallery
           <div className="w-[280px] h-[280px] bg-gray-50 rounded-lg">
             <FileUploader
               imageUrl=""
-              onFieldChange={(e) => {
-                const files = e.target.files
-                if (files && files.length > 0) {
-                  setFiles(Array.from(files))
-                  setMessage('Image selected! Click "Add Photos" to upload.')
-                }
+              onFieldChange={(url: string) => {
+                setMessage(`Image URL received: ${url}`)
               }}
               setFiles={setFiles}
             />

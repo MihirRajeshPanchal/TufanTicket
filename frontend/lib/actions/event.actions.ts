@@ -252,7 +252,7 @@ export async function getEventPhotos(eventId: string) {
     }
 
     // Make sure we're returning an array of photo URLs
-    return JSON.parse(JSON.stringify(eventPhotos.photos || []))
+    return JSON.parse(JSON.stringify(Array.isArray(eventPhotos) ? [] : eventPhotos?.photos || []))
   } catch (error) {
     console.error('Error fetching event photos:', error)
     return []
@@ -313,7 +313,18 @@ export async function getEventComments(eventId: string) {
     }
 
     // Transform the data to match the expected format
-    const formattedComments = comments.comments.map(comment => ({
+    const formattedComments = comments.map((comment: { 
+      _id: mongoose.Types.ObjectId, 
+      userId: { 
+        _id: mongoose.Types.ObjectId, 
+        firstName: string, 
+        lastName: string, 
+        username: string, 
+        photo?: string 
+      }, 
+      text: string, 
+      createdAt: Date 
+    }) => ({
       _id: comment._id.toString(),
       userId: {
         _id: comment.userId._id.toString(),
@@ -348,7 +359,13 @@ export async function addEventComment({
     await connectToDatabase()
 
     // Get the user data first
-    const user = await User.findById(userId).lean()
+    const user = await User.findById(userId).lean() as { 
+      _id: mongoose.Types.ObjectId, 
+      firstName: string, 
+      lastName: string, 
+      username: string, 
+      photo?: string 
+    } | null
     if (!user) throw new Error('User not found')
 
     const result = await Comment.findOneAndUpdate(

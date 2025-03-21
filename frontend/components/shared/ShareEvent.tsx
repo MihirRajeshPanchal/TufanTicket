@@ -18,7 +18,7 @@ interface ShareEventProps {
 }
 
 export const ShareEvent = ({ eventId, title, description }: ShareEventProps) => {
-    const shareUrlRef = useRef<string>(`http://localhost:3000/events/${eventId}`);
+    const shareUrlRef = useRef<string>(`${process.env.NEXT_PUBLIC_SERVER_URL}/events/${eventId}`);
     const text = encodeURIComponent(`${title} - ${description}`);
 
     const handleShare = (type: string) => {

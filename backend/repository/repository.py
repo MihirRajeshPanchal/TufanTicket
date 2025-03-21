@@ -138,4 +138,4 @@ class MongoDBClient:
         
         except Exception as e:
             print(f"Error in find_last_two: {e}")
-            return []
+            return [] 

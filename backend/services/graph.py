@@ -161,4 +161,76 @@ def remove_user_nodes():
             """
         )
     
+    driver.close() 
+
+def add_comment_to_graph(comment_id: str, event_id: str, text: str):
+    """Creates a Comment node and connects it to an Event node"""
+    with driver.session() as session:
+        
+        session.run(
+            """
+            MERGE (c:Comment {id: $commentId})
+            ON CREATE SET
+                c.text = $text,
+                c.comment = $text,  // Adding an explicit property for display
+                c.createdAt = datetime()
+            ON MATCH SET
+                c.text = $text,
+                c.comment = $text,  // Updating the display property
+                c.updatedAt = datetime()
+            WITH c
+            MATCH (e:Event {id: $eventId})
+            MERGE (c)-[:BELONGS_TO]->(e)
+            """,
+            commentId=comment_id,
+            eventId=event_id,
+            text=text
+        )
+        
+        
+        session.run(
+            """
+            CALL apoc.meta.nodeTypeProperties() 
+            yield nodeType, nodeLabels
+            where "Comment" in nodeLabels
+            CALL apoc.meta.cypher("
+              CALL db.schema.visualization() YIELD nodes
+              WITH nodes WHERE 'Comment' IN nodes.labels
+              CALL apoc.graph.fromPaths([[nodes]], {}, {}) YIELD graph
+              CALL apoc.export.graphml.graph(graph, $filename, {})
+              YIELD file
+              RETURN file
+            ",{filename:'comment_config.graphml'})
+            yield value
+            RETURN value
+            """)
+            
+        
+        session.run(
+            """
+            CALL db.setNodePropertyValue("comment", "caption")
+            """
+        )
+    
     driver.close()
+
+
+def add_all_comments_to_graph():
+    """Batch process to add all comments from MongoDB to Neo4j"""
+    from backend.constants.tufan import mongo_client
+    
+    comment_data = mongo_client.read_all("comments")
+    comment_count = 0
+    
+    for comment_doc in comment_data:
+        if "eventId" in comment_doc and comment_doc["eventId"] and "comments" in comment_doc:
+            event_id = str(comment_doc["eventId"])
+            
+            for comment in comment_doc["comments"]:
+                comment_id = str(comment["_id"])
+                text = comment.get("text", "")
+                
+                add_comment_to_graph(comment_id, event_id, text)
+                comment_count += 1
+    
+    return comment_count

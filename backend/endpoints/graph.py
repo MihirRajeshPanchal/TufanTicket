@@ -3,6 +3,7 @@ from backend.models.user import User
 from backend.constants.tufan import mongo_client, driver
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from backend.services.graph import (
+    add_all_comments_to_graph,
     add_event_to_graph,
     add_organizer_to_graph,
     add_attendee_to_graph,
@@ -111,7 +112,7 @@ async def events_endpoint():
 @router.post("/add_order_relationships")
 async def order_relationships_endpoint():
     order_data = mongo_client.read_all("orders")
-    
+     
     relationship_count = 0
     for order in order_data:
         if "buyer" in order and "event" in order:
@@ -133,6 +134,15 @@ async def remove_user_nodes_endpoint():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to remove User nodes: {str(e)}")
 
+@router.post("/add_comments_to_graph")
+async def comments_endpoint():
+    """Add all comments from MongoDB to the graph database"""
+    try:
+        comment_count = add_all_comments_to_graph()
+        return {"message": f"Added {comment_count} comments to the graph database"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add comments to graph: {str(e)}")
+
 async def build_full_graph_task():
     """Background task to build the full graph by calling all APIs in sequence."""
     try:
@@ -141,6 +151,7 @@ async def build_full_graph_task():
         await organizers_endpoint()
         await attendees_endpoint()
         await order_relationships_endpoint()
+        await comments_endpoint()
         print("Full graph build completed successfully")
     except Exception as e:
         print(f"Error building full graph: {str(e)}")

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { FileUploader } from './FileUploader'
 import { addEventPhotos } from '@/lib/actions/event.actions'
 import { usePathname } from 'next/navigation'
-import { IEventPhoto } from '@/types'
+
 
 interface EventPhotoGalleryProps {
   eventId: string

@@ -1,12 +1,12 @@
-1. Populate the db as much as possible use python script to do that
-2. Graph Database Recommendation Model
-3. See Event Highlights 
-    - Event Photos
-        - Instagram API to Post Directly from 
-    - Event Comments
-        - Sentiment Analysis
-4. Website Heatmap
+    1. Populate the db as much as possible use python script to do that
+    2. Graph Database Recommendation Model
+    3. See Event Highlights 
+        - Event Photos
+            - Instagram API to Post Directly from 
+        - Event Comments
+            - Sentiment Analysis
+    4. Website Heatmap
 5. Chatbot on the data in mongodb
-6. Whatsapp/Email New Events
+    6. Whatsapp/Email New Events
 7. How many people going to the event
-8. Event Recommendations
+    8. Event Recommendations

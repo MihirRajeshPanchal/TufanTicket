@@ -34,7 +34,7 @@ export const ShareEvent = ({ eventId, title, description }: ShareEventProps) => 
         }
 
         if (url) window.open(url, '_blank');
-    };
+    }; 
 
     return (
         <div className="flex items-center justify-center">

@@ -16,7 +16,6 @@ import {
   GetAllEventsParams,
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
-  IEventPhoto,
 } from '@/types'
 
 const getCategoryByName = async (name: string) => {
@@ -89,7 +88,7 @@ export async function getEventById(eventId: string) {
     // Ensure photos array exists
     const eventWithPhotos = {
       ...event,
-      photos: event.photos || []
+      photos: !Array.isArray(event) && event.photos ? event.photos : []
     }
 
     return JSON.parse(JSON.stringify(eventWithPhotos))
@@ -244,7 +243,7 @@ export async function getEventPhotos(eventId: string) {
     await connectToDatabase()
     
     const event = await Event.findById(eventId).lean()
-    return JSON.parse(JSON.stringify(event?.photos || []))
+    return JSON.parse(JSON.stringify(Array.isArray(event) ? [] : event?.photos || []))
   } catch (error) {
     console.error('Error fetching event photos:', error)
     return []

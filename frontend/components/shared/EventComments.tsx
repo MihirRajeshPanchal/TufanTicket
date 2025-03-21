@@ -50,7 +50,6 @@ const EventComments = ({ eventId, currentUser, comments: initialComments }: Even
         eventId,
         userId: currentUser._id,
         text: newComment.trim(),
-        replyTo: replyTo,
         path: pathname
       })
 

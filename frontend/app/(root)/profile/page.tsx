@@ -2,6 +2,7 @@ import Collection from '@/components/shared/Collection'
 import { Button } from '@/components/ui/button'
 import { getEventsByUser } from '@/lib/actions/event.actions'
 import { getOrdersByUser } from '@/lib/actions/order.actions'
+import { getUserByClerkId } from '@/lib/actions/user.actions' // New import
 import { IOrder } from '@/lib/database/models/order.model'
 import { SearchParamProps } from '@/types'
 import { auth } from '@clerk/nextjs'
@@ -9,16 +10,31 @@ import Link from 'next/link'
 import React from 'react'
 
 const ProfilePage = async ({ searchParams }: SearchParamProps) => {
-  const { sessionClaims } = auth();
-  const userId = sessionClaims?.userId as string;
+  const { userId: clerkUserId } = auth() || {};
 
+  if (!clerkUserId) {
+    console.error("User ID is undefined. Please ensure the user is authenticated.");
+    return <div>Error: User not authenticated</div>;
+  }
+
+  const mongoUser = await getUserByClerkId(clerkUserId);
+  
+  if (!mongoUser) {
+    console.error("MongoDB user not found for Clerk ID:", clerkUserId);
+    return <div>Error: User profile not found</div>;
+  }
+
+  const mongoUserId = mongoUser._id.toString();
+  console.log("Using MongoDB ObjectId:", mongoUserId);
+  
   const ordersPage = Number(searchParams?.ordersPage) || 1;
   const eventsPage = Number(searchParams?.eventsPage) || 1;
 
-  const orders = await getOrdersByUser({ userId, page: ordersPage})
+
+  const orders = await getOrdersByUser({ userId: mongoUserId, page: ordersPage })
 
   const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
-  const organizedEvents = await getEventsByUser({ userId, page: eventsPage })
+  const organizedEvents = await getEventsByUser({ userId: mongoUserId, page: eventsPage })
 
   return (
     <>

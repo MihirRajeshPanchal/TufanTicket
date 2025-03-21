@@ -39,6 +39,19 @@ export async function getUserById(userId: string) {
   }
 }
 
+export async function getUserByClerkId(clerkId: string) {
+  try {
+    await connectToDatabase();
+    
+    const user = await User.findOne({ clerkId: clerkId });
+    
+    return user;
+  } catch (error) {
+    console.error("Error fetching user by Clerk ID:", error);
+    throw error;
+  }
+}
+
 export async function updateUser(clerkId: string, user: UpdateUserParams) {
   try {
     await connectToDatabase()

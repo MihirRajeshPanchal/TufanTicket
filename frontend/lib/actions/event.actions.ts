@@ -30,10 +30,10 @@ const populateEvent = (query: any) => {
     .populate({ path: 'category', model: Category, select: '_id name' })
 }
 
-// Function to handle Clerk to MongoDB ID mapping
+
 const getUserByClerkId = async (clerkId: string) => {
   try {
-    // Assuming you have a clerkId field in your User model
+    
     const user = await User.findOne({ clerkId })
     if (!user) throw new Error('User not found')
     return user
@@ -42,18 +42,18 @@ const getUserByClerkId = async (clerkId: string) => {
   }
 }
 
-// CREATE
+
 export async function createEvent({ userId, event, path }: CreateEventParams) {
   try {
     await connectToDatabase()
 
-    // Check if userId is a Clerk ID (not a MongoDB ObjectId)
+    
     let organizer;
     if (userId && userId.startsWith('user_')) {
-      // It's a Clerk ID, find the corresponding MongoDB user
+      
       organizer = await getUserByClerkId(userId)
     } else {
-      // Try to find as normal ObjectId
+      
       organizer = await User.findById(userId)
     }
 
@@ -62,7 +62,7 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
     const newEvent = await Event.create({ 
       ...event, 
       category: event.categoryId, 
-      organizer: organizer._id // Use the MongoDB ObjectId
+      organizer: organizer._id 
     })
     
     revalidatePath(path)
@@ -73,7 +73,7 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
   }
 }
 
-// GET ONE EVENT BY ID
+
 export async function getEventById(eventId: string) {
   try {
     await connectToDatabase()
@@ -81,13 +81,13 @@ export async function getEventById(eventId: string) {
     const event = await Event.findById(eventId)
       .populate('organizer')
       .populate('category')
-      .lean() // Convert to plain object
+      .lean() 
 
     if (!event) {
       throw new Error('Event not found')
     }
 
-    // Ensure photos array exists
+    
     const eventWithPhotos = {
       ...event,
       photos: !Array.isArray(event) && event.photos ? event.photos : []
@@ -100,23 +100,23 @@ export async function getEventById(eventId: string) {
   }
 }
 
-// UPDATE
+
 export async function updateEvent({ userId, event, path }: UpdateEventParams) {
   try {
     await connectToDatabase()
     
-    // Get the MongoDB user
+    
     let organizer;
     if (userId && userId.startsWith('user_')) {
       organizer = await getUserByClerkId(userId)
       if (!organizer) throw new Error('User not found')
-      userId = organizer._id.toString(); // Convert to string for comparison
+      userId = organizer._id.toString(); 
     }
 
     const eventToUpdate = await Event.findById(event._id)
     if (!eventToUpdate) throw new Error('Event not found')
     
-    // Compare the organizer IDs
+    
     if (eventToUpdate.organizer.toString() !== userId) {
       throw new Error('Unauthorized: You are not the organizer of this event')
     }
@@ -134,7 +134,7 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
   }
 }
 
-// DELETE
+
 export async function deleteEvent({ eventId, path }: DeleteEventParams) {
   try {
     await connectToDatabase()
@@ -146,20 +146,20 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
   }
 }
 
-// GET EVENTS BY ORGANIZER
+
 export async function getEventsByUser({ userId, limit = 30, page }: GetEventsByUserParams) {
   try {
     await connectToDatabase()
 
-    // Check if userId is undefined or null and handle accordingly
+    
     if (!userId) {
-      // Return empty data if userId is not provided
+      
       return { data: [], totalPages: 0 }
     }
 
     let organizerId = userId;
     
-    // If it's a Clerk ID, find the corresponding MongoDB user
+    
     if (userId.startsWith('user_')) {
       const organizer = await getUserByClerkId(userId)
       if (!organizer) throw new Error('User not found')
@@ -183,7 +183,7 @@ export async function getEventsByUser({ userId, limit = 30, page }: GetEventsByU
   }
 }
 
-// GET ALL EVENTS (unchanged)
+
 export async function getAllEvents({ query, limit = 40, page, category }: GetAllEventsParams) {
   try {
     await connectToDatabase()
@@ -212,7 +212,7 @@ export async function getAllEvents({ query, limit = 40, page, category }: GetAll
   }
 }
 
-// GET RELATED EVENTS (unchanged)
+
 export async function getRelatedEventsByCategory({
   categoryId,
   eventId,
@@ -239,28 +239,27 @@ export async function getRelatedEventsByCategory({
   }
 }
 
-// Get photos for an event
+
 export async function getEventPhotos(eventId: string) {
   try {
     await connectToDatabase()
     
-    const event = await Event.findById(eventId)
-      .select('photos')
-      .lean()
+    const eventPhotos = await EventPhoto.findOne({ eventId }).lean()
+    console.log('Found event photos:', eventPhotos) 
     
-    if (!event || !event.photos) {
+    if (!eventPhotos) {
       return []
     }
 
-    const photoUrls = event.photos.map(photo => photo.url)
-    return JSON.parse(JSON.stringify(photoUrls))
+    
+    return JSON.parse(JSON.stringify(Array.isArray(eventPhotos) ? [] : eventPhotos?.photos || []))
   } catch (error) {
     console.error('Error fetching event photos:', error)
     return []
   }
 }
 
-// Add photos to an event
+
 export async function addEventPhotos({
   eventId,
   photoUrl,
@@ -299,30 +298,44 @@ export async function getEventComments(eventId: string) {
   try {
     await connectToDatabase()
     
-    const commentDoc = await Comment.findOne({ eventId })
+    const comments = await Comment.findOne({ eventId })
       .populate({
         path: 'comments.userId',
         model: User,
-        select: '_id firstName lastName photo username'
+        select: '_id firstName lastName username photo clerkId'
       })
       .lean()
     
-    if (!commentDoc || !commentDoc.comments) {
+    console.log('Fetched comments with user data:', comments); 
+
+    if (!comments) {
       return []
     }
 
-    const formattedComments = commentDoc.comments.map(comment => ({
+    
+    const formattedComments = comments.map((comment: { 
+      _id: mongoose.Types.ObjectId, 
+      userId: { 
+        _id: mongoose.Types.ObjectId, 
+        firstName: string, 
+        lastName: string, 
+        username: string, 
+        photo?: string 
+      }, 
+      text: string, 
+      createdAt: Date 
+    }) => ({
       _id: comment._id.toString(),
       userId: {
         _id: comment.userId._id.toString(),
-        firstName: comment.userId.firstName || '',
-        lastName: comment.userId.lastName || '',
-        photo: comment.userId.photo || '/assets/icons/profile-placeholder.svg',
-        username: comment.userId.username || ''
+        firstName: comment.userId.firstName,
+        lastName: comment.userId.lastName,
+        username: comment.userId.username,
+        photo: comment.userId.photo || '/assets/icons/profile-placeholder.svg'
       },
       text: comment.text,
       createdAt: comment.createdAt
-    }))
+    }));
 
     return JSON.parse(JSON.stringify(formattedComments))
   } catch (error) {
@@ -345,7 +358,14 @@ export async function addEventComment({
   try {
     await connectToDatabase()
 
-    const user = await User.findById(userId).lean()
+    
+    const user = await User.findById(userId).lean() as { 
+      _id: mongoose.Types.ObjectId, 
+      firstName: string, 
+      lastName: string, 
+      username: string, 
+      photo?: string 
+    } | null
     if (!user) throw new Error('User not found')
 
     const result = await Comment.findOneAndUpdate(
@@ -366,23 +386,21 @@ export async function addEventComment({
     ).populate({
       path: 'comments.userId',
       model: User,
-      select: '_id firstName lastName photo username'
+      select: '_id firstName lastName username photo'
     })
 
-    if (!result || !result.comments || result.comments.length === 0) {
-      throw new Error('Failed to add comment')
-    }
-
+    
     const newComment = result.comments[result.comments.length - 1]
+    
     
     const formattedComment = {
       _id: newComment._id.toString(),
       userId: {
         _id: user._id.toString(),
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        photo: user.photo || '/assets/icons/profile-placeholder.svg',
-        username: user.username || ''
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        photo: user.photo || '/assets/icons/profile-placeholder.svg'
       },
       text: newComment.text,
       createdAt: newComment.createdAt

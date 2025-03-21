@@ -10,7 +10,3 @@
 6. Whatsapp/Email New Events
 7. How many people going to the event
 8. Event Recommendations
-
-Jinit
-1. Complete Profile Page for My tickets, events organized and my orders
-make api calls on payment success from stripe and display appropriate data of that user

@@ -31,9 +31,9 @@ export default async function Home({ searchParams }: SearchParamProps) {
             <p className="p-regular-20 md:p-regular-24">Book and learn helpful tips from 3,168+ mentors in world-class companies with our global community.</p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Button size="lg" asChild className="button w-full sm:w-fit">
-              <Link href="#events">
-                Explore Now
-              </Link>
+                <Link href="#events">
+                  Explore Now
+                </Link>
               </Button>
               <SidebarButton />
             </div>

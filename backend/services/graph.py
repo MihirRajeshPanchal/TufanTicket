@@ -162,21 +162,20 @@ def remove_user_nodes():
         )
     
     driver.close() 
-
+    
 def add_comment_to_graph(comment_id: str, event_id: str, text: str):
     """Creates a Comment node and connects it to an Event node"""
     with driver.session() as session:
-        
         session.run(
             """
             MERGE (c:Comment {id: $commentId})
             ON CREATE SET
                 c.text = $text,
-                c.comment = $text,  // Adding an explicit property for display
+                c.displayText = $text,  
                 c.createdAt = datetime()
             ON MATCH SET
                 c.text = $text,
-                c.comment = $text,  // Updating the display property
+                c.displayText = $text,
                 c.updatedAt = datetime()
             WITH c
             MATCH (e:Event {id: $eventId})
@@ -186,35 +185,9 @@ def add_comment_to_graph(comment_id: str, event_id: str, text: str):
             eventId=event_id,
             text=text
         )
-        
-        
-        session.run(
-            """
-            CALL apoc.meta.nodeTypeProperties() 
-            yield nodeType, nodeLabels
-            where "Comment" in nodeLabels
-            CALL apoc.meta.cypher("
-              CALL db.schema.visualization() YIELD nodes
-              WITH nodes WHERE 'Comment' IN nodes.labels
-              CALL apoc.graph.fromPaths([[nodes]], {}, {}) YIELD graph
-              CALL apoc.export.graphml.graph(graph, $filename, {})
-              YIELD file
-              RETURN file
-            ",{filename:'comment_config.graphml'})
-            yield value
-            RETURN value
-            """)
-            
-        
-        session.run(
-            """
-            CALL db.setNodePropertyValue("comment", "caption")
-            """
-        )
     
     driver.close()
-
-
+    
 def add_all_comments_to_graph():
     """Batch process to add all comments from MongoDB to Neo4j"""
     from backend.constants.tufan import mongo_client

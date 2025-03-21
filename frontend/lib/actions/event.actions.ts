@@ -8,6 +8,8 @@ import Event from '@/lib/database/models/event.model'
 import User from '@/lib/database/models/user.model'
 import Category from '@/lib/database/models/category.model'
 import { handleError } from '@/lib/utils'
+import Comment from '@/lib/database/models/comment.model'
+import EventPhoto from '@/lib/database/models/eventPhoto.model'
 
 import {
   CreateEventParams,
@@ -16,7 +18,6 @@ import {
   GetAllEventsParams,
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
-  IEventPhoto,
 } from '@/types'
 
 const getCategoryByName = async (name: string) => {
@@ -243,8 +244,15 @@ export async function getEventPhotos(eventId: string) {
   try {
     await connectToDatabase()
     
-    const event = await Event.findById(eventId).lean()
-    return JSON.parse(JSON.stringify(event?.photos || []))
+    const eventPhotos = await EventPhoto.findOne({ eventId }).lean()
+    console.log('Found event photos:', eventPhotos) // Debug log
+    
+    if (!eventPhotos) {
+      return []
+    }
+
+    // Make sure we're returning an array of photo URLs
+    return JSON.parse(JSON.stringify(eventPhotos.photos || []))
   } catch (error) {
     console.error('Error fetching event photos:', error)
     return []
@@ -282,6 +290,110 @@ export async function addEventPhotos({
 
   } catch (error) {
     console.error('Error saving photo:', error)
+    throw error
+  }
+}
+
+export async function getEventComments(eventId: string) {
+  try {
+    await connectToDatabase()
+    
+    const comments = await Comment.findOne({ eventId })
+      .populate({
+        path: 'comments.userId',
+        model: User,
+        select: '_id firstName lastName username photo clerkId'
+      })
+      .lean()
+    
+    console.log('Fetched comments with user data:', comments); // Debug log
+
+    if (!comments) {
+      return []
+    }
+
+    // Transform the data to match the expected format
+    const formattedComments = comments.comments.map(comment => ({
+      _id: comment._id.toString(),
+      userId: {
+        _id: comment.userId._id.toString(),
+        firstName: comment.userId.firstName,
+        lastName: comment.userId.lastName,
+        username: comment.userId.username,
+        photo: comment.userId.photo || '/assets/icons/profile-placeholder.svg'
+      },
+      text: comment.text,
+      createdAt: comment.createdAt
+    }));
+
+    return JSON.parse(JSON.stringify(formattedComments))
+  } catch (error) {
+    console.error('Error fetching comments:', error)
+    return []
+  }
+}
+
+export async function addEventComment({
+  eventId,
+  userId,
+  text,
+  path
+}: {
+  eventId: string
+  userId: string
+  text: string
+  path: string
+}) {
+  try {
+    await connectToDatabase()
+
+    // Get the user data first
+    const user = await User.findById(userId).lean()
+    if (!user) throw new Error('User not found')
+
+    const result = await Comment.findOneAndUpdate(
+      { eventId },
+      { 
+        $push: { 
+          comments: {
+            userId,
+            text,
+            createdAt: new Date()
+          }
+        }
+      },
+      { 
+        upsert: true, 
+        new: true 
+      }
+    ).populate({
+      path: 'comments.userId',
+      model: User,
+      select: '_id firstName lastName username photo'
+    })
+
+    // Get the newly added comment
+    const newComment = result.comments[result.comments.length - 1]
+    
+    // Format the comment to match the expected structure
+    const formattedComment = {
+      _id: newComment._id.toString(),
+      userId: {
+        _id: user._id.toString(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        photo: user.photo || '/assets/icons/profile-placeholder.svg'
+      },
+      text: newComment.text,
+      createdAt: newComment.createdAt
+    }
+
+    revalidatePath(path)
+    return JSON.parse(JSON.stringify({ comments: [formattedComment] }))
+
+  } catch (error) {
+    console.error('Error adding comment:', error)
     throw error
   }
 }

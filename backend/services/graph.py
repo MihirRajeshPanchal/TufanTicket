@@ -2,28 +2,62 @@ from backend.constants.tufan import driver
 from backend.models.events import Event
 from backend.models.user import User
 
-def add_user_to_graph(user: User):
+def add_organizer_to_graph(user: User):
+    """Creates an Organizer node directly (no User node)"""
     with driver.session() as session:
-        
         session.run(
             """
-            MERGE (u:User {id: $id})
+            MERGE (o:Organizer {id: $id})
             ON CREATE SET
-                u.clerkId = $clerkId,
-                u.firstName = $firstName,
-                u.lastName = $lastName,
-                u.username = $username,
-                u.email = $email,
-                u.photo = $photo,
-                u.createdAt = datetime()
+                o.clerkId = $clerkId,
+                o.firstName = $firstName,
+                o.lastName = $lastName,
+                o.username = $username,
+                o.email = $email,
+                o.photo = $photo,
+                o.createdAt = datetime()
             ON MATCH SET
-                u.clerkId = $clerkId,
-                u.firstName = $firstName,
-                u.lastName = $lastName,
-                u.username = $username,
-                u.email = $email,
-                u.photo = $photo,
-                u.updatedAt = datetime()
+                o.clerkId = $clerkId,
+                o.firstName = $firstName,
+                o.lastName = $lastName,
+                o.username = $username,
+                o.email = $email,
+                o.photo = $photo,
+                o.updatedAt = datetime()
+            """,
+            id=str(user.id),
+            clerkId=user.clerkId,
+            firstName=user.firstName,
+            lastName=user.lastName,
+            username=user.username,
+            email=user.email,
+            photo=user.photo
+        )
+    
+    driver.close()
+
+def add_attendee_to_graph(user: User):
+    """Creates an Attendee node directly (no User node)"""
+    with driver.session() as session:
+        session.run(
+            """
+            MERGE (a:Attendee {id: $id})
+            ON CREATE SET
+                a.clerkId = $clerkId,
+                a.firstName = $firstName,
+                a.lastName = $lastName,
+                a.username = $username,
+                a.email = $email,
+                a.photo = $photo,
+                a.createdAt = datetime()
+            ON MATCH SET
+                a.clerkId = $clerkId,
+                a.firstName = $firstName,
+                a.lastName = $lastName,
+                a.username = $username,
+                a.email = $email,
+                a.photo = $photo,
+                a.updatedAt = datetime()
             """,
             id=str(user.id),
             clerkId=user.clerkId,
@@ -77,8 +111,8 @@ def add_event_to_graph(event: Event):
         if event.organizerId:
             session.run(
                 """
-                MATCH (e:Event {id: $eventId})
-                MATCH (o:User {id: $organizerId})
+                MERGE (o:Organizer {id: $organizerId})
+                MERGE (e:Event {id: $eventId})
                 MERGE (o)-[:ORGANIZED]->(e)
                 """,
                 eventId=event.id,
@@ -99,4 +133,32 @@ def add_category_to_graph(event_id: str, category_id: str, category_name: str):
             categoryId=category_id,
             categoryName=category_name,
             eventId=event_id
+        ) 
+        
+def create_attends_relationship(user_id: str, event_id: str):
+    with driver.session() as session:
+        
+        session.run(
+            """
+            MERGE (a:Attendee {id: $userId})
+            MERGE (e:Event {id: $eventId})
+            MERGE (a)-[:ATTENDS]->(e)
+            """,
+            userId=user_id,
+            eventId=event_id
         )
+    
+    driver.close()
+
+def remove_user_nodes():
+    """Remove any existing User nodes and their relationships from the graph."""
+    with driver.session() as session:
+        
+        session.run(
+            """
+            MATCH (u:User)
+            DETACH DELETE u
+            """
+        )
+    
+    driver.close()

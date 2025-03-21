@@ -97,7 +97,7 @@ class MongoDBClient:
                 result.append(convert_objectid_to_str(doc))  
             return result
         except Exception as e:
-            return []
+            return [] 
         
     def find_one(self, collection_name: str, query: Dict[str, Any], sort: List[Tuple[str, int]] = None) -> Optional[Dict[str, Any]]:
         try:

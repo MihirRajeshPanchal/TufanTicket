@@ -14,3 +14,4 @@ class Event(BaseModel):
     url: Optional[str] = None
     categoryId: Optional[str] = None
     organizerId: Optional[str] = None
+ 

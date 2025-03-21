@@ -13,10 +13,10 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: 'TufanTicket',
-  description: 'TufanTicket is a platform for event management.',
+  description: 'Event management platform.',
   icons: {
-    icon: '/assets/images/logo.svg'
-  }
+    icon: '/assets/images/icon.svg',
+  },
 }
 
 export default function RootLayout({

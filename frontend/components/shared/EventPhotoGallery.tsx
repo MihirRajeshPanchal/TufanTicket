@@ -8,6 +8,7 @@ import { FileUploader } from './FileUploader'
 import { addEventPhotos } from '@/lib/actions/event.actions'
 import { usePathname } from 'next/navigation'
 
+
 interface EventPhotoGalleryProps {
   eventId: string
   photos: string[]

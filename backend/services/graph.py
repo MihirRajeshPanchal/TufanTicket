@@ -2,28 +2,28 @@ from backend.constants.tufan import driver
 from backend.models.events import Event
 from backend.models.user import User
 
-def add_user_to_graph(user: User):
+def add_organizer_to_graph(user: User):
+    """Creates an Organizer node directly (no User node)"""
     with driver.session() as session:
-        
         session.run(
             """
-            MERGE (u:User {id: $id})
+            MERGE (o:Organizer {id: $id})
             ON CREATE SET
-                u.clerkId = $clerkId,
-                u.firstName = $firstName,
-                u.lastName = $lastName,
-                u.username = $username,
-                u.email = $email,
-                u.photo = $photo,
-                u.createdAt = datetime()
+                o.clerkId = $clerkId,
+                o.firstName = $firstName,
+                o.lastName = $lastName,
+                o.username = $username,
+                o.email = $email,
+                o.photo = $photo,
+                o.createdAt = datetime()
             ON MATCH SET
-                u.clerkId = $clerkId,
-                u.firstName = $firstName,
-                u.lastName = $lastName,
-                u.username = $username,
-                u.email = $email,
-                u.photo = $photo,
-                u.updatedAt = datetime()
+                o.clerkId = $clerkId,
+                o.firstName = $firstName,
+                o.lastName = $lastName,
+                o.username = $username,
+                o.email = $email,
+                o.photo = $photo,
+                o.updatedAt = datetime()
             """,
             id=str(user.id),
             clerkId=user.clerkId,
@@ -32,6 +32,133 @@ def add_user_to_graph(user: User):
             username=user.username,
             email=user.email,
             photo=user.photo
+        )
+    
+    driver.close()
+
+def add_attendee_to_graph(user: User):
+    """Creates an Attendee node directly (no User node)"""
+    with driver.session() as session:
+        session.run(
+            """
+            MERGE (a:Attendee {id: $id})
+            ON CREATE SET
+                a.clerkId = $clerkId,
+                a.firstName = $firstName,
+                a.lastName = $lastName,
+                a.username = $username,
+                a.email = $email,
+                a.photo = $photo,
+                a.createdAt = datetime()
+            ON MATCH SET
+                a.clerkId = $clerkId,
+                a.firstName = $firstName,
+                a.lastName = $lastName,
+                a.username = $username,
+                a.email = $email,
+                a.photo = $photo,
+                a.updatedAt = datetime()
+            """,
+            id=str(user.id),
+            clerkId=user.clerkId,
+            firstName=user.firstName,
+            lastName=user.lastName,
+            username=user.username,
+            email=user.email,
+            photo=user.photo
+        )
+    
+    driver.close()
+    
+def add_event_to_graph(event: Event):
+    with driver.session() as session:
+        session.run(
+            """
+            MERGE (e:Event {id: $id})
+            ON CREATE SET
+                e.title = $title,
+                e.description = $description,
+                e.location = $location,
+                e.imageUrl = $imageUrl,
+                e.startDateTime = datetime($startDateTime),
+                e.endDateTime = datetime($endDateTime),
+                e.isFree = $isFree,
+                e.url = $url,
+                e.createdAt = datetime()
+            ON MATCH SET
+                e.title = $title,
+                e.description = $description,
+                e.location = $location,
+                e.imageUrl = $imageUrl,
+                e.startDateTime = datetime($startDateTime),
+                e.endDateTime = datetime($endDateTime),
+                e.isFree = $isFree,
+                e.url = $url,
+                e.updatedAt = datetime()
+            """,
+            id=event.id,
+            title=event.title,
+            description=event.description,
+            location=event.location,
+            imageUrl=event.imageUrl,
+            startDateTime=event.startDateTime.isoformat(),
+            endDateTime=event.endDateTime.isoformat(),
+            isFree=event.isFree,
+            url=event.url
+        )
+
+        
+        if event.organizerId:
+            session.run(
+                """
+                MERGE (o:Organizer {id: $organizerId})
+                MERGE (e:Event {id: $eventId})
+                MERGE (o)-[:ORGANIZED]->(e)
+                """,
+                eventId=event.id,
+                organizerId=event.organizerId
+            )
+    
+    driver.close()
+
+def add_category_to_graph(event_id: str, category_id: str, category_name: str):
+    with driver.session() as session:
+        session.run(
+            """
+            MERGE (c:Category {id: $categoryId})
+            ON CREATE SET c.name = $categoryName, c.createdAt = datetime()
+            MERGE (e:Event {id: $eventId})
+            MERGE (e)-[:IS_A]->(c)
+            """,
+            categoryId=category_id,
+            categoryName=category_name,
+            eventId=event_id
+        ) 
+        
+def create_attends_relationship(user_id: str, event_id: str):
+    with driver.session() as session:
+        
+        session.run(
+            """
+            MERGE (a:Attendee {id: $userId})
+            MERGE (e:Event {id: $eventId})
+            MERGE (a)-[:ATTENDS]->(e)
+            """,
+            userId=user_id,
+            eventId=event_id
+        )
+    
+    driver.close()
+
+def remove_user_nodes():
+    """Remove any existing User nodes and their relationships from the graph."""
+    with driver.session() as session:
+        
+        session.run(
+            """
+            MATCH (u:User)
+            DETACH DELETE u
+            """
         )
     
     driver.close()

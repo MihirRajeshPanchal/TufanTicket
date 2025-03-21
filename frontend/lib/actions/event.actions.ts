@@ -90,7 +90,7 @@ export async function getEventById(eventId: string) {
     // Ensure photos array exists
     const eventWithPhotos = {
       ...event,
-      photos: event.photos || []
+      photos: !Array.isArray(event) && event.photos ? event.photos : []
     }
 
     return JSON.parse(JSON.stringify(eventWithPhotos))

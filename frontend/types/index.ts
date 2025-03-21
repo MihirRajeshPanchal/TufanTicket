@@ -161,7 +161,13 @@ export interface IUser {
 
 export interface IComment {
   _id: string;
-  userId: IUser;
+  userId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    photo: string;
+    username?: string;
+  };
   text: string;
   createdAt: Date;
 }

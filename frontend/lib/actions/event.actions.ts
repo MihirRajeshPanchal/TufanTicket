@@ -1,15 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import mongoose from 'mongoose'
-
 import { connectToDatabase } from '@/lib/database'
 import Event from '@/lib/database/models/event.model'
 import User from '@/lib/database/models/user.model'
 import Category from '@/lib/database/models/category.model'
-import { handleError } from '@/lib/utils'
 import Comment from '@/lib/database/models/comment.model'
-import EventPhoto from '@/lib/database/models/eventPhoto.model'
+import { handleError } from '@/lib/utils'
 
 import {
   CreateEventParams,
@@ -79,21 +76,18 @@ export async function getEventById(eventId: string) {
     await connectToDatabase()
 
     const event = await Event.findById(eventId)
-      .populate('organizer')
-      .populate('category')
-      .lean() // Convert to plain object
+      .populate('organizer', '_id firstName lastName')
+      .populate('category', '_id name')
+      .lean()
 
     if (!event) {
       throw new Error('Event not found')
     }
 
-    // Ensure photos array exists
-    const eventWithPhotos = {
+    return JSON.parse(JSON.stringify({
       ...event,
-      photos: !Array.isArray(event) && event.photos ? event.photos : []
-    }
-
-    return JSON.parse(JSON.stringify(eventWithPhotos))
+      photos: event.photos || []
+    }))
   } catch (error) {
     console.error('Error fetching event:', error)
     throw error
@@ -252,10 +246,11 @@ export async function getEventPhotos(eventId: string) {
       return []
     }
 
-    const photoUrls = event.photos.map(photo => photo.url)
-    return JSON.parse(JSON.stringify(photoUrls))
+    // Explicitly type the photo structure
+    const photos = (event.photos as { url: string }[]).map(photo => photo.url)
+    return JSON.parse(JSON.stringify(photos))
   } catch (error) {
-    console.error('Error fetching event photos:', error)
+    console.error('Error fetching photos:', error)
     return []
   }
 }
@@ -273,24 +268,24 @@ export async function addEventPhotos({
   try {
     await connectToDatabase()
 
-    const result = await Event.findByIdAndUpdate(
+    const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
       { 
         $push: { 
           photos: { url: photoUrl }
         }
       },
-      { 
-        new: true,
-        runValidators: true 
-      }
+      { new: true }
     ).lean()
 
-    revalidatePath(path)
-    return JSON.parse(JSON.stringify(result))
+    if (!updatedEvent) {
+      throw new Error('Event not found')
+    }
 
+    revalidatePath(path)
+    return JSON.parse(JSON.stringify(updatedEvent))
   } catch (error) {
-    console.error('Error saving photo:', error)
+    console.error('Error adding photo:', error)
     throw error
   }
 }
@@ -307,24 +302,24 @@ export async function getEventComments(eventId: string) {
       })
       .lean()
     
-    if (!commentDoc || !commentDoc.comments) {
+    if (!commentDoc?.comments) {
       return []
     }
 
-    const formattedComments = commentDoc.comments.map(comment => ({
+    const formattedComments = commentDoc.comments.map((comment: any) => ({
       _id: comment._id.toString(),
+      text: comment.text,
+      createdAt: comment.createdAt,
       userId: {
         _id: comment.userId._id.toString(),
         firstName: comment.userId.firstName || '',
         lastName: comment.userId.lastName || '',
         photo: comment.userId.photo || '/assets/icons/profile-placeholder.svg',
         username: comment.userId.username || ''
-      },
-      text: comment.text,
-      createdAt: comment.createdAt
+      }
     }))
 
-    return JSON.parse(JSON.stringify(formattedComments))
+    return formattedComments
   } catch (error) {
     console.error('Error fetching comments:', error)
     return []
@@ -363,34 +358,34 @@ export async function addEventComment({
         upsert: true, 
         new: true 
       }
-    ).populate({
+    )
+    .populate({
       path: 'comments.userId',
       model: User,
       select: '_id firstName lastName photo username'
     })
+    .lean()
 
-    if (!result || !result.comments || result.comments.length === 0) {
+    if (!result) {
       throw new Error('Failed to add comment')
     }
 
     const newComment = result.comments[result.comments.length - 1]
-    
     const formattedComment = {
       _id: newComment._id.toString(),
+      text: newComment.text,
+      createdAt: newComment.createdAt,
       userId: {
         _id: user._id.toString(),
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         photo: user.photo || '/assets/icons/profile-placeholder.svg',
         username: user.username || ''
-      },
-      text: newComment.text,
-      createdAt: newComment.createdAt
+      }
     }
 
     revalidatePath(path)
-    return JSON.parse(JSON.stringify({ comments: [formattedComment] }))
-
+    return { comment: formattedComment }
   } catch (error) {
     console.error('Error adding comment:', error)
     throw error

@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import mongoose from 'mongoose'
 
 import { connectToDatabase } from '@/lib/database'
 import Event from '@/lib/database/models/event.model'
@@ -15,6 +16,7 @@ import {
   GetAllEventsParams,
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
+  IEventPhoto,
 } from '@/types'
 
 const getCategoryByName = async (name: string) => {
@@ -75,13 +77,25 @@ export async function getEventById(eventId: string) {
   try {
     await connectToDatabase()
 
-    const event = await populateEvent(Event.findById(eventId))
+    const event = await Event.findById(eventId)
+      .populate('organizer')
+      .populate('category')
+      .lean() // Convert to plain object
 
-    if (!event) throw new Error('Event not found')
+    if (!event) {
+      throw new Error('Event not found')
+    }
 
-    return JSON.parse(JSON.stringify(event))
+    // Ensure photos array exists
+    const eventWithPhotos = {
+      ...event,
+      photos: event.photos || []
+    }
+
+    return JSON.parse(JSON.stringify(eventWithPhotos))
   } catch (error) {
-    handleError(error)
+    console.error('Error fetching event:', error)
+    throw error
   }
 }
 
@@ -221,5 +235,53 @@ export async function getRelatedEventsByCategory({
     return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
   } catch (error) {
     handleError(error)
+  }
+}
+
+// Get photos for an event
+export async function getEventPhotos(eventId: string) {
+  try {
+    await connectToDatabase()
+    
+    const event = await Event.findById(eventId).lean()
+    return JSON.parse(JSON.stringify(event?.photos || []))
+  } catch (error) {
+    console.error('Error fetching event photos:', error)
+    return []
+  }
+}
+
+// Add photos to an event
+export async function addEventPhotos({
+  eventId,
+  photoUrl,
+  path
+}: {
+  eventId: string
+  photoUrl: string
+  path: string
+}) {
+  try {
+    await connectToDatabase()
+
+    const result = await Event.findByIdAndUpdate(
+      eventId,
+      { 
+        $push: { 
+          photos: { url: photoUrl }
+        }
+      },
+      { 
+        new: true,
+        runValidators: true 
+      }
+    ).lean()
+
+    revalidatePath(path)
+    return JSON.parse(JSON.stringify(result))
+
+  } catch (error) {
+    console.error('Error saving photo:', error)
+    throw error
   }
 }

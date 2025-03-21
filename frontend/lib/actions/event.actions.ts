@@ -46,7 +46,7 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
 
     // Check if userId is a Clerk ID (not a MongoDB ObjectId)
     let organizer;
-    if (userId.startsWith('user_')) {
+    if (userId && userId.startsWith('user_')) {
       // It's a Clerk ID, find the corresponding MongoDB user
       organizer = await getUserByClerkId(userId)
     } else {
@@ -92,7 +92,7 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
     
     // Get the MongoDB user
     let organizer;
-    if (userId.startsWith('user_')) {
+    if (userId && userId.startsWith('user_')) {
       organizer = await getUserByClerkId(userId)
       if (!organizer) throw new Error('User not found')
       userId = organizer._id.toString(); // Convert to string for comparison
@@ -135,6 +135,12 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
 export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
   try {
     await connectToDatabase()
+
+    // Check if userId is undefined or null and handle accordingly
+    if (!userId) {
+      // Return empty data if userId is not provided
+      return { data: [], totalPages: 0 }
+    }
 
     let organizerId = userId;
     

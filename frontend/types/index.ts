@@ -96,6 +96,7 @@ export type Event = {
     _id: string
     name: string
   }
+  photos: IEventPhoto[]
 }
 
 // ====== CATEGORY PARAMS
@@ -146,4 +147,16 @@ export type RemoveUrlQueryParams = {
 export type SearchParamProps = {
   params: { id: string }
   searchParams: { [key: string]: string | string[] | undefined }
+}
+
+// Add this to your existing types
+interface IEventPhoto {
+  _id?: string;
+  url: string;
+}
+
+// Update IEvent interface to include photos
+interface IEvent {
+  // ... existing event fields ...
+  photos: IEventPhoto[];
 }

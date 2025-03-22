@@ -15,6 +15,7 @@ import {
 } from 'next-share'
 import { ShareEvent } from '@/components/shared/ShareEvent';
 import EventCard from '@/components/shared/EventCard';
+import EventLocation from '@/components/shared/EventLocation';
 
 const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) => {
   const { userId } = auth();
@@ -190,6 +191,7 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
 
                   </div>
 
+                  <div className='flex flex-row w-full justify-between'>
                   <div className="flex items-start gap-3">
                     <Image
                       src="/assets/icons/location.svg"
@@ -200,6 +202,8 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
                     />
                     <p className="text-gray-600 text-sm">{event.location}</p>
 
+                  </div>
+                  <EventLocation event={event} />
                   </div>
                 </div>
 

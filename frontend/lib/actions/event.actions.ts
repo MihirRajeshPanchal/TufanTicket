@@ -7,6 +7,7 @@ import User from '@/lib/database/models/user.model'
 import Category from '@/lib/database/models/category.model'
 import Comment from '@/lib/database/models/comment.model'
 import { handleError } from '@/lib/utils'
+import mongoose from 'mongoose'
 
 import {
   CreateEventParams,
@@ -16,6 +17,7 @@ import {
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
 } from '@/types'
+import EventPhoto from '../database/models/eventPhoto.model'
 
 const getCategoryByName = async (name: string) => {
   return Category.findOne({ name: { $regex: name, $options: 'i' } })
@@ -78,7 +80,7 @@ export async function getEventById(eventId: string) {
     const event = await Event.findById(eventId)
       .populate('organizer', '_id firstName lastName')
       .populate('category', '_id name')
-      .lean()
+      .lean() as { photos?: string[] } | null
 
     if (!event) {
       throw new Error('Event not found')
@@ -238,7 +240,7 @@ export async function getEventPhotos(eventId: string) {
   try {
     await connectToDatabase()
     
-    const eventPhotos = await EventPhoto.findOne({ eventId }).lean()
+    const eventPhotos = await EventPhoto.findOne({ eventId }).lean() as { photos?: { url: string }[] } | null
     console.log('Found event photos:', eventPhotos) 
     
     if (!eventPhotos) {
@@ -246,7 +248,9 @@ export async function getEventPhotos(eventId: string) {
     }
 
     // Explicitly type the photo structure
-    const photos = (event.photos as { url: string }[]).map(photo => photo.url)
+    const photos = (eventPhotos as { photos?: { url: string }[] } | null)?.photos
+      ? eventPhotos.photos?.map(photo => photo.url) ?? []
+      : []
     return JSON.parse(JSON.stringify(photos))
   } catch (error) {
     console.error('Error fetching photos:', error)
@@ -301,11 +305,11 @@ export async function getEventComments(eventId: string) {
       })
       .lean()
     
-    if (!commentDoc?.comments) {
+    if (!Array.isArray(comments) || comments.length === 0) {
       return []
     }
 
-    const formattedComments = commentDoc.comments.map((comment: any) => ({
+    const formattedComments = comments.map((comment: any) => ({
       _id: comment._id.toString(),
       text: comment.text,
       createdAt: comment.createdAt,
@@ -370,13 +374,13 @@ export async function addEventComment({
       model: User,
       select: '_id firstName lastName username photo'
     })
-    .lean()
+    .lean() as { comments: { _id: string, text: string, createdAt: Date, userId: any }[] } | null
 
     if (!result) {
       throw new Error('Failed to add comment')
     }
 
-    const newComment = result.comments[result.comments.length - 1]
+    const newComment = result?.comments[result.comments.length - 1]
     const formattedComment = {
       _id: newComment._id.toString(),
       text: newComment.text,

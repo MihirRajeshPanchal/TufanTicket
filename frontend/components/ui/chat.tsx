@@ -31,7 +31,7 @@ export default function AIEventFinder() {
           ...prev,
           {
             sender: "bot",
-            text: "I found some events that might interest you! How about the Annual Tech Conference happening next weekend? It features workshops on AI and networking opportunities.",
+            text: "Hi Mihir, how are you doing?",
           },
         ])
       }, 1000)

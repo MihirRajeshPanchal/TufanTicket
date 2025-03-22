@@ -17,6 +17,7 @@ import {
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
 } from '@/types'
+import EventPhoto from '../database/models/eventPhoto.model'
 
 const getCategoryByName = async (name: string) => {
   return Category.findOne({ name: { $regex: name, $options: 'i' } })
@@ -87,7 +88,6 @@ export async function getEventById(eventId: string) {
 
     return JSON.parse(JSON.stringify({
       ...event,
-      photos: event.photos || []
     }))
   } catch (error) {
     console.error('Error fetching event:', error)
@@ -240,15 +240,16 @@ export async function getEventPhotos(eventId: string) {
     await connectToDatabase()
     
     const eventPhotos = await EventPhoto.findOne({ eventId }).lean()
-    console.log('Found event photos:', eventPhotos) 
     
     if (!eventPhotos) {
       return []
     }
 
-    // Explicitly type the photo structure
-    const photos = (event.photos as { url: string }[]).map(photo => photo.url)
-    return JSON.parse(JSON.stringify(photos))
+    // Simply return the array of strings directly
+    if (eventPhotos && !Array.isArray(eventPhotos) && 'photos' in eventPhotos) {
+      return JSON.parse(JSON.stringify(eventPhotos.photos))
+    }
+    return []
   } catch (error) {
     console.error('Error fetching photos:', error)
     return []

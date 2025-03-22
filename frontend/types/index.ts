@@ -96,7 +96,6 @@ export type Event = {
     _id: string
     name: string
   }
-  photos: IEventPhoto[]
 }
 
 // ====== CATEGORY PARAMS

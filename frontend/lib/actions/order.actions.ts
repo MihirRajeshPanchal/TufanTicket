@@ -48,10 +48,19 @@ export const createOrder = async (order: CreateOrderParams) => {
   try {
     await connectToDatabase();
     
+    if (!order.stripeId) {
+      throw new Error('Stripe ID is required for creating an order');
+    }
+    
+    const existingOrder = await Order.findOne({ stripeId: order.stripeId });
+    if (existingOrder) {
+      return JSON.parse(JSON.stringify(existingOrder));
+    }
+    
     const newOrder = await Order.create({
       ...order,
       event: order.eventId,
-      buyer: order.buyerId,
+      buyer: order.buyerId, 
     });
 
     return JSON.parse(JSON.stringify(newOrder));

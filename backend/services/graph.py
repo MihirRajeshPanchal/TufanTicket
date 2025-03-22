@@ -1,7 +1,6 @@
 from backend.constants.tufan import driver
 from backend.models.events import Event
 from backend.models.user import User
-from backend.services import sentiment
 
 def add_organizer_to_graph(user: User):
     """Creates an Organizer node directly (no User node)"""
@@ -166,7 +165,6 @@ def remove_user_nodes():
     
 def add_comment_to_graph(comment_id: str, event_id: str, text: str):
     """Creates a Comment node and connects it to an Event node"""
-    sentimentScore = sentiment.get_conviction_score(text)
     with driver.session() as session:
         session.run(
             """
@@ -174,7 +172,6 @@ def add_comment_to_graph(comment_id: str, event_id: str, text: str):
             ON CREATE SET
                 c.text = $text,
                 c.displayText = $text,  
-                c.sentiment = $sentimentScore,
                 c.createdAt = datetime()
             ON MATCH SET
                 c.text = $text,
@@ -186,8 +183,7 @@ def add_comment_to_graph(comment_id: str, event_id: str, text: str):
             """,
             commentId=comment_id,
             eventId=event_id,
-            text=text,
-            sentimentScore=sentimentScore
+            text=text
         )
     
     driver.close()

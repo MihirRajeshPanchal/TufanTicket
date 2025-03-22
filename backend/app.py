@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.endpoints import graph
+from backend.endpoints import chatbot
 
 app = FastAPI()
 
@@ -13,6 +14,7 @@ app.add_middleware(
 )
 
 app.include_router(graph.router)
+app.include_router(chatbot.router)
 
 @app.get("/")
 def root():

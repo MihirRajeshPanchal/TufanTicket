@@ -6,15 +6,22 @@
         - Event Comments
             - Sentiment Analysis
     4. Website Heatmap
-5. Chatbot on the data in mongodb
     6. Whatsapp/Email New Events
-7. How many people going to the event
+    7. How many people going to the event
     8. Event Recommendations
+    9. Share Button gallery and event as well
+    13. Add event to calendar
 
-9. Share Button gallery and event as well
-10. Ribbon
-11. Trend Graph (Button)
-12. Like and Dislike Button
-13. Add event to calendar
-14. Photo Collage
-15. blinking Feature
+5. Chatbot on the data in mongodb  --Mihir
+20. QR Code ticket send on checkout  --Jinit
+17. Location in frontend  --Pookie
+18. map based routing     --Pookie
+19. WatchlistFeatures     --Jinit
+22. lastminuteSale     --dummy data 
+14. Photo send via whatsapp/instagram   
+21 responsive comments   --Jinit
+10. Ribbon  --Pokie
+11. Trend Graph (Button) --Pookie
+12. Like and Dislike Button  --Jinit
+15. blinking Feature   --Mihir
+16. For You Event

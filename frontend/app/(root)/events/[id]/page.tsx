@@ -9,15 +9,20 @@ import EventComments from '@/components/shared/EventComments'
 import { auth } from "@clerk/nextjs";
 import { getUserById } from "@/lib/actions/user.actions";
 import { getEventParticipantsCount } from '@/lib/actions/order.actions'
+import {
+  FacebookShareButton,
+  FacebookIcon,
+} from 'next-share'
+import { ShareEvent } from '@/components/shared/ShareEvent';
 
 const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) => {
   const { userId } = auth();
-  
+
   // Get event and other data
   const event = await getEventById(id);
   const photos = await getEventPhotos(id);
   const comments = await getEventComments(id);
-  
+
   // Get current user data with error handling
   let currentUser = null;
   if (userId) {
@@ -52,14 +57,40 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
               {/* Image Container */}
               <div className="relative p-4 flex flex-col">
                 <div className="relative h-[400px] w-full rounded-xl overflow-hidden border-8 border-white shadow-inner">
-                  <Image 
+                  <Image
                     src={event.imageUrl}
                     alt="hero image"
                     fill
                     className="object-cover object-center hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                
+
+                <div className="mt-4 p-4 bg-primary-50 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+
+                      <div className="ml-2">
+                        <p className="text-sm font-semibold text-gray-900">
+                          Share This Event
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Share it with your friends
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Share Button */}
+                    <ShareEvent
+                      eventId={event._id}
+                      title={event.title}
+                      description={event.description}
+                      image={event.imageUrl}
+                    />
+                  </div>
+                </div>
+
+
+
                 {/* Participants Count Section */}
                 <div className="mt-4 p-4 bg-primary-50 rounded-xl">
                   <div className="flex items-center justify-between">
@@ -67,8 +98,8 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
                       <div className="relative flex -space-x-2">
                         {/* Sample avatar stack - you can make this dynamic if you have participant avatars */}
                         {[...Array(3)].map((_, i) => (
-                          <div 
-                            key={i} 
+                          <div
+                            key={i}
                             className="w-8 h-8 rounded-full bg-primary-500 border-2 border-white flex items-center justify-center"
                           >
                             <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -93,7 +124,7 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
                         </p>
                       </div>
                     </div>
-                    
+
                     {/* Live Indicator */}
                     <div className="flex items-center gap-1">
                       <span className="relative flex h-3 w-3">
@@ -132,34 +163,43 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
 
                 <div className="flex flex-col gap-4 border-t pt-4">
                   <div className='flex items-start gap-3'>
-                    <Image 
-                      src="/assets/icons/calendar.svg" 
-                      alt="calendar" 
-                      width={24} 
+                    <Image
+                      src="/assets/icons/calendar.svg"
+                      alt="calendar"
+                      width={24}
                       height={24}
                       className="mt-1"
                     />
-                    <div className="flex flex-col text-gray-600 text-sm">
-                      <p>
-                        {formatDateTime(event.startDateTime).dateOnly} - {' '}
-                        {formatDateTime(event.startDateTime).timeOnly}
-                      </p>
-                      <p>
-                        {formatDateTime(event.endDateTime).dateOnly} -  {' '}
-                        {formatDateTime(event.endDateTime).timeOnly}
-                      </p>
+                    <div className="flex flex-row justify-between w-full text-gray-600 text-sm">
+                      <div className="flex flex-col text-gray-600 text-sm">
+                        <p>
+                          {formatDateTime(event.startDateTime).dateOnly} - {' '}
+                          {formatDateTime(event.startDateTime).timeOnly}
+                        </p>
+                        <p>
+                          {formatDateTime(event.endDateTime).dateOnly} -  {' '}
+                          {formatDateTime(event.endDateTime).timeOnly}
+                        </p>
+                      </div>
+                      <div className="flex items-center ml-4">
+                        <p className="text-primary-500 text-sm font-semibold">Add to Calendar</p>
+                      </div>
                     </div>
+
+
+
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Image 
-                      src="/assets/icons/location.svg" 
-                      alt="location" 
-                      width={24} 
+                    <Image
+                      src="/assets/icons/location.svg"
+                      alt="location"
+                      width={24}
                       height={24}
                       className="mt-1"
                     />
                     <p className="text-gray-600 text-sm">{event.location}</p>
+
                   </div>
                 </div>
 
@@ -167,10 +207,10 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
                   <h3 className="font-semibold text-gray-900">About the Event:</h3>
                   <p className="text-gray-600 text-sm line-clamp-3">{event.description}</p>
                   {event.url && (
-                    <a 
-                      href={event.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <a
+                      href={event.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-primary-500 text-sm hover:underline truncate"
                     >
                       {event.url}
@@ -187,7 +227,7 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
       <div className="wrapper my-8">
         {/* Photo Gallery Section */}
         <section className="mb-8">
-          <EventPhotoGallery 
+          <EventPhotoGallery
             eventId={event._id}
             photos={eventPhotos}
           />
@@ -196,7 +236,7 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
         {/* Related Events Section */}
         <section className="mb-8">
           <h2 className="h2-bold mb-6">Related Events</h2>
-          <Collection 
+          <Collection
             data={relatedEvents?.data}
             emptyTitle="No Events Found"
             emptyStateSubtext="Come back later"
@@ -212,9 +252,9 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
           <div className="border rounded-xl">
             <div className="p-6">
               <h3 className="text-xl font-semibold mb-6">All Discussions</h3>
-              
+
               {currentUser ? (
-                <EventComments 
+                <EventComments
                   eventId={event._id}
                   currentUser={currentUser}
                   comments={comments}

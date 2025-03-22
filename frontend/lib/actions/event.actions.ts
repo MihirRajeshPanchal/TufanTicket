@@ -27,10 +27,10 @@ const populateEvent = (query: any) => {
     .populate({ path: 'category', model: Category, select: '_id name' })
 }
 
-// Function to handle Clerk to MongoDB ID mapping
+
 const getUserByClerkId = async (clerkId: string) => {
   try {
-    // Assuming you have a clerkId field in your User model
+    
     const user = await User.findOne({ clerkId })
     if (!user) throw new Error('User not found')
     return user
@@ -39,18 +39,18 @@ const getUserByClerkId = async (clerkId: string) => {
   }
 }
 
-// CREATE
+
 export async function createEvent({ userId, event, path }: CreateEventParams) {
   try {
     await connectToDatabase()
 
-    // Check if userId is a Clerk ID (not a MongoDB ObjectId)
+    
     let organizer;
     if (userId && userId.startsWith('user_')) {
-      // It's a Clerk ID, find the corresponding MongoDB user
+      
       organizer = await getUserByClerkId(userId)
     } else {
-      // Try to find as normal ObjectId
+      
       organizer = await User.findById(userId)
     }
 
@@ -59,7 +59,7 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
     const newEvent = await Event.create({ 
       ...event, 
       category: event.categoryId, 
-      organizer: organizer._id // Use the MongoDB ObjectId
+      organizer: organizer._id 
     })
     
     revalidatePath(path)
@@ -70,7 +70,7 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
   }
 }
 
-// GET ONE EVENT BY ID
+
 export async function getEventById(eventId: string) {
   try {
     await connectToDatabase()
@@ -94,23 +94,23 @@ export async function getEventById(eventId: string) {
   }
 }
 
-// UPDATE
+
 export async function updateEvent({ userId, event, path }: UpdateEventParams) {
   try {
     await connectToDatabase()
     
-    // Get the MongoDB user
+    
     let organizer;
     if (userId && userId.startsWith('user_')) {
       organizer = await getUserByClerkId(userId)
       if (!organizer) throw new Error('User not found')
-      userId = organizer._id.toString(); // Convert to string for comparison
+      userId = organizer._id.toString(); 
     }
 
     const eventToUpdate = await Event.findById(event._id)
     if (!eventToUpdate) throw new Error('Event not found')
     
-    // Compare the organizer IDs
+    
     if (eventToUpdate.organizer.toString() !== userId) {
       throw new Error('Unauthorized: You are not the organizer of this event')
     }
@@ -128,7 +128,7 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
   }
 }
 
-// DELETE
+
 export async function deleteEvent({ eventId, path }: DeleteEventParams) {
   try {
     await connectToDatabase()
@@ -140,20 +140,20 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
   }
 }
 
-// GET EVENTS BY ORGANIZER
+
 export async function getEventsByUser({ userId, limit = 30, page }: GetEventsByUserParams) {
   try {
     await connectToDatabase()
 
-    // Check if userId is undefined or null and handle accordingly
+    
     if (!userId) {
-      // Return empty data if userId is not provided
+      
       return { data: [], totalPages: 0 }
     }
 
     let organizerId = userId;
     
-    // If it's a Clerk ID, find the corresponding MongoDB user
+    
     if (userId.startsWith('user_')) {
       const organizer = await getUserByClerkId(userId)
       if (!organizer) throw new Error('User not found')
@@ -177,7 +177,7 @@ export async function getEventsByUser({ userId, limit = 30, page }: GetEventsByU
   }
 }
 
-// GET ALL EVENTS (unchanged)
+
 export async function getAllEvents({ query, limit = 40, page, category }: GetAllEventsParams) {
   try {
     await connectToDatabase()
@@ -206,7 +206,7 @@ export async function getAllEvents({ query, limit = 40, page, category }: GetAll
   }
 }
 
-// GET RELATED EVENTS (unchanged)
+
 export async function getRelatedEventsByCategory({
   categoryId,
   eventId,
@@ -233,16 +233,15 @@ export async function getRelatedEventsByCategory({
   }
 }
 
-// Get photos for an event
+
 export async function getEventPhotos(eventId: string) {
   try {
     await connectToDatabase()
     
-    const event = await Event.findById(eventId)
-      .select('photos')
-      .lean()
+    const eventPhotos = await EventPhoto.findOne({ eventId }).lean()
+    console.log('Found event photos:', eventPhotos) 
     
-    if (!event || !event.photos) {
+    if (!eventPhotos) {
       return []
     }
 
@@ -255,7 +254,7 @@ export async function getEventPhotos(eventId: string) {
   }
 }
 
-// Add photos to an event
+
 export async function addEventPhotos({
   eventId,
   photoUrl,
@@ -294,11 +293,11 @@ export async function getEventComments(eventId: string) {
   try {
     await connectToDatabase()
     
-    const commentDoc = await Comment.findOne({ eventId })
+    const comments = await Comment.findOne({ eventId })
       .populate({
         path: 'comments.userId',
         model: User,
-        select: '_id firstName lastName photo username'
+        select: '_id firstName lastName username photo clerkId'
       })
       .lean()
     
@@ -340,7 +339,14 @@ export async function addEventComment({
   try {
     await connectToDatabase()
 
-    const user = await User.findById(userId).lean()
+    
+    const user = await User.findById(userId).lean() as { 
+      _id: mongoose.Types.ObjectId, 
+      firstName: string, 
+      lastName: string, 
+      username: string, 
+      photo?: string 
+    } | null
     if (!user) throw new Error('User not found')
 
     const result = await Comment.findOneAndUpdate(
@@ -362,7 +368,7 @@ export async function addEventComment({
     .populate({
       path: 'comments.userId',
       model: User,
-      select: '_id firstName lastName photo username'
+      select: '_id firstName lastName username photo'
     })
     .lean()
 

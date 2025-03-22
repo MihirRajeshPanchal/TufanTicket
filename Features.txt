@@ -18,7 +18,7 @@
 
     5. Chatbot on the data in mongodb  --Mihir
     23. - Sentiment Analysis -Mihir
-20. QR Code ticket send on checkout  --Jinit
+20. QR Code ticket send on checkout  --Jinit 
     18. map based routing     --Pookie
 19. WatchlistFeatures     --Jinit
 22. lastminuteSale     --dummy data 

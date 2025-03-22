@@ -32,3 +32,4 @@
 
 waitlist 
 locking
+face detect

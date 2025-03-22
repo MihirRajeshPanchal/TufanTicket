@@ -7,6 +7,11 @@
     4. Website Heatmap
     6. Whatsapp/Email New Events
     7. How many people going to the event
+            - Sentiment Analysis
+    4. Website Heatmap done
+5. Chatbot on the data in mongodb
+    6. Whatsapp/Email New Events done
+7. How many people going to the event
     8. Event Recommendations
     9. Share Button gallery and event as well
     13. Add event to calendar

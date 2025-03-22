@@ -54,7 +54,7 @@ const EventComments = ({ eventId, currentUser, comments: initialComments }: Even
       })
 
       if (result) {
-        // setComments(prevComments => [...prevComments, result.comments[result.comments.length - 1]]) [TODO: JINIT]
+        setComments(prevComments => [...prevComments, result.comment])
         setNewComment('')
         setReplyTo(null)
       }

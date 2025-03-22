@@ -16,13 +16,6 @@ export interface IEvent extends Document {
   organizer: Schema.Types.ObjectId;
   photos: { url: string }[];
 }
-export interface IOrganizer {
-  _id: Schema.Types.ObjectId;
-  firstName: string;
-  lastName: string;
-  username: string;
-  photo: string;
-}
 
 const EventSchema = new Schema({
   title: { type: String, required: true },

@@ -255,8 +255,6 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
         <section className="max-w-4xl">
           <div className="border rounded-xl">
             <div className="p-6">
-              <h3 className="text-xl font-semibold mb-6">All Discussions</h3>
-
               {currentUser ? (
                 <EventComments
                   eventId={event._id}

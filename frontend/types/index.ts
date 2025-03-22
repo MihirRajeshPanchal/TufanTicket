@@ -1,5 +1,3 @@
-import mongoose from "mongoose"
-
 // ====== USER PARAMS
 export type CreateUserParams = {
   clerkId: string
@@ -159,14 +157,6 @@ export interface IUser {
   username?: string;
   photo?: string;
   clerkId?: string;
-}
-export interface IOrganizer {
-  _id: mongoose.Types.ObjectId;
-  firstName: string;
-  lastName: string;
-  username: string;
-  photo: string;
-
 }
 
 export interface IComment {

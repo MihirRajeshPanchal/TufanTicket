@@ -7,6 +7,7 @@ import User from '@/lib/database/models/user.model'
 import Category from '@/lib/database/models/category.model'
 import Comment from '@/lib/database/models/comment.model'
 import { handleError } from '@/lib/utils'
+import mongoose from 'mongoose'
 
 import {
   CreateEventParams,
@@ -301,11 +302,13 @@ export async function getEventComments(eventId: string) {
       })
       .lean()
     
-    if (!commentDoc?.comments) {
+    if (!Array.isArray(comments) && !comments?.comments) {
       return []
     }
 
-    const formattedComments = commentDoc.comments.map((comment: any) => ({
+    const formattedComments = Array.isArray(comments)
+      ? []
+      : comments?.comments?.map((comment: any) => ({
       _id: comment._id.toString(),
       text: comment.text,
       createdAt: comment.createdAt,
@@ -376,22 +379,25 @@ export async function addEventComment({
       throw new Error('Failed to add comment')
     }
 
-    const newComment = result.comments[result.comments.length - 1]
-    const formattedComment = {
-      _id: newComment._id.toString(),
-      text: newComment.text,
-      createdAt: newComment.createdAt,
-      userId: {
-        _id: user._id.toString(),
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        photo: user.photo || '/assets/icons/profile-placeholder.svg',
-        username: user.username || ''
+    if (!Array.isArray(result) && result?.comments) {
+      const newComment = result.comments[result.comments.length - 1]
+      const formattedComment = {
+        _id: newComment._id.toString(),
+        text: newComment.text,
+        createdAt: newComment.createdAt,
+        userId: {
+          _id: user._id.toString(),
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          photo: user.photo || '/assets/icons/profile-placeholder.svg',
+          username: user.username || ''
+        }
       }
+      revalidatePath(path)
+      return { comment: formattedComment }
+    } else {
+      throw new Error('Invalid result format')
     }
-
-    revalidatePath(path)
-    return { comment: formattedComment }
   } catch (error) {
     console.error('Error adding comment:', error)
     throw error

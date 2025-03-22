@@ -16,7 +16,7 @@ const Card = ({ event, hasOrderLink, hidePrice }: CardProps) => {
   const { sessionClaims } = auth();
   const userId = sessionClaims?.userId as string;
 
-  const isEventCreator = userId === event.organizer._id.toString();
+  const isEventCreator = userId === event.organizer.toString();
 
   return (
     <div className="group relative flex min-h-[380px] w-full max-w-[400px] flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-lg md:min-h-[438px]">
@@ -45,7 +45,9 @@ const Card = ({ event, hasOrderLink, hidePrice }: CardProps) => {
             {event.isFree ? 'FREE' : `$${event.price}`}
           </span>
           <p className="p-semibold-14 rounded-full bg-grey-500/10 px-4 py-1 text-grey-500 line-clamp-1">
-            {event.category.name}
+          {typeof event.organizer === 'object' && 'firstName' in event.organizer && 'lastName' in event.organizer
+              ? `${event.organizer.firstName} ${event.organizer.lastName}`
+              : 'Unknown Organizer'}
           </p>
         </div>}
 
@@ -59,7 +61,9 @@ const Card = ({ event, hasOrderLink, hidePrice }: CardProps) => {
 
         <div className="flex-between w-full">
           <p className="p-medium-14 md:p-medium-16 text-grey-600">
-            {event.organizer.firstName} {event.organizer.lastName}
+            {typeof event.organizer === 'object' && 'firstName' in event.organizer && 'lastName' in event.organizer
+              ? `${event.organizer.firstName} ${event.organizer.lastName}`
+              : 'Mihir Panchal'}
           </p>
 
           {hasOrderLink && (

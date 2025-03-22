@@ -14,6 +14,7 @@ import {
   FacebookIcon,
 } from 'next-share'
 import { ShareEvent } from '@/components/shared/ShareEvent';
+import EventCard from '@/components/shared/EventCard';
 
 const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) => {
   const { userId } = auth();
@@ -181,9 +182,8 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
                           {formatDateTime(event.endDateTime).timeOnly}
                         </p>
                       </div>
-                      <div className="flex items-center ml-4">
-                        <p className="text-primary-500 text-sm font-semibold">Add to Calendar</p>
-                      </div>
+                      <EventCard event={event} />
+
                     </div>
 
 

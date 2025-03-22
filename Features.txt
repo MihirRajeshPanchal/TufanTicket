@@ -28,7 +28,7 @@
 11. Trend Graph (Button) --Pookie
 12. Like and Dislike Button  --Jinit
 15. blinking Feature   --Mihir
-16. For You Event
+16. For You Event 
 
 waitlist 
 locking

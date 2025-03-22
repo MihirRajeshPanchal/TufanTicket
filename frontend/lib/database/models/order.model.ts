@@ -29,7 +29,6 @@ const OrderSchema = new Schema({
   buyerId: { type: String, required: true },
   totalAmount: { type: String },
   createdAt: { type: Date, default: Date.now },
-  status: { type: String, required: true } // 'PENDING' | 'PAID' | 'FAILED'
 })
 
 const Order = models?.Order || model('Order', OrderSchema)

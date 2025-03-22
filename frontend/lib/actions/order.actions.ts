@@ -153,7 +153,6 @@ export async function getEventParticipantsCount(eventId: string) {
 
     const participantsCount = await Order.countDocuments({
       eventId: eventId,
-      status: 'PAID' // Only count paid orders
     });
 
     return participantsCount;

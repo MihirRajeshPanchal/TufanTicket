@@ -9,6 +9,8 @@ import EventComments from '@/components/shared/EventComments'
 import { auth } from "@clerk/nextjs";
 import { getUserById } from "@/lib/actions/user.actions";
 import { getEventParticipantsCount } from '@/lib/actions/order.actions'
+
+import TicketModal from '@/components/shared/TicketModal';
 import {
   FacebookShareButton,
   FacebookIcon,
@@ -162,7 +164,9 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
                 </div>
 
                 <CheckoutButton event={event} />
-
+                {
+                  currentUser && (<TicketModal event={event} currentUser={currentUser} />)
+                }
                 <div className="flex flex-col gap-4 border-t pt-4">
                   <div className='flex items-start gap-3'>
                     <Image

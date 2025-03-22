@@ -558,3 +558,27 @@ body {
   background-image: radial-gradient(var(--tw-gradient-stops));
 }
 
+.perspective {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@keyframes gentle-sway {
+  0%, 100% { transform: rotate3d(1, 1, 1, 0deg); }
+  50% { transform: rotate3d(1, 1, 1, 2deg); }
+}
+
+.animate-gentle-sway {
+  animation: gentle-sway 6s ease-in-out infinite;
+}

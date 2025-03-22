@@ -1,4 +1,4 @@
-# RecursiveDepression_D2K
+![image](https://github.com/user-attachments/assets/03da13a5-5770-4ab3-85fd-b09dc16916aa)![image](https://github.com/user-attachments/assets/c59629d5-ea18-448b-9b72-08901ff93de9)# RecursiveDepression_D2K
 
 A comprehensive platform featuring both a web application and a mobile app for [brief project description].
 
@@ -22,10 +22,21 @@ A comprehensive platform featuring both a web application and a mobile app for [
 ## 📸 Screenshots
 
 ### Mobile App
-[Add screenshots of your mobile app here]
+Screenshots to be added soon
+
 
 ### Web Application
-[Add screenshots of your web application here]
+![image](https://github.com/user-attachments/assets/4ceafe21-675b-4f3e-8691-a80e299d9da1)
+![image](https://github.com/user-attachments/assets/ad323b66-623b-4aca-af2a-1cc62681f9ea)
+![image](https://github.com/user-attachments/assets/c36a0f5b-865c-4388-9f0e-ddb4260a538f)
+![image](https://github.com/user-attachments/assets/d847f1a1-c039-4fc8-8aba-db32608efdb2)
+![image](https://github.com/user-attachments/assets/36e3bf03-606e-411a-b0df-ac0ddd2fb1b9)
+![image](https://github.com/user-attachments/assets/d54623a4-0e0c-43c0-89f2-fdb9a758c841)
+![image](https://github.com/user-attachments/assets/dc315567-d14b-482a-914f-846775c637dc)
+![Uploading image.png…]()
+
+
+
 
 
 
@@ -79,12 +90,6 @@ npm run dev
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
-
-## 📱 Mobile App Features
-- [Mobile-specific features]
-
-## 💻 Web Features
-- [Web-specific features]
 
 ## 🔧 Configuration
 

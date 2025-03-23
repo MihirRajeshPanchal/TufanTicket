@@ -1,131 +1,158 @@
-![image](https://github.com/user-attachments/assets/03da13a5-5770-4ab3-85fd-b09dc16916aa)![image](https://github.com/user-attachments/assets/c59629d5-ea18-448b-9b72-08901ff93de9)# RecursiveDepression_D2K
+## 🐾 TufanTicket 🐾  
 
-A comprehensive platform featuring both a web application and a mobile app for [brief project description].
+### 🌟 Overview  
+**TufanTicket** is an AI-powered **event discovery and recommendation system** designed to revolutionize how Gen Z users find and engage with events. By leveraging machine learning, it provides **personalized recommendations**, **trend analysis**, and **intelligent insights** for both users and event organizers.  
 
-## 📱 Project Overview
+✅ Discover events tailored to your interests  
+✅ Predict event trends and popularity  
+✅ Enhance event organizers’ decision-making  
+✅ Optimize pricing strategies  
+✅ Improve user engagement with AI-driven recommendations  
 
-[Add a brief description of what your project does and its main features]
+---
 
-## 🚀 Tech Stack
-
-### Mobile App
-- React Native
-- NativeWind (TailwindCSS for React Native)
-- Expo
-
-### Web Frontend
-- Next.js
-- TypeScript
-- TailwindCSS
-- [Add any other major libraries/frameworks]
-
-## 📸 Screenshots
-
-### Mobile App
-Screenshots to be added soon
-
-
-### Web Application
-![image](https://github.com/user-attachments/assets/4ceafe21-675b-4f3e-8691-a80e299d9da1)
-![image](https://github.com/user-attachments/assets/ad323b66-623b-4aca-af2a-1cc62681f9ea)
-![image](https://github.com/user-attachments/assets/c36a0f5b-865c-4388-9f0e-ddb4260a538f)
-![image](https://github.com/user-attachments/assets/d847f1a1-c039-4fc8-8aba-db32608efdb2)
-![image](https://github.com/user-attachments/assets/36e3bf03-606e-411a-b0df-ac0ddd2fb1b9)
-![image](https://github.com/user-attachments/assets/d54623a4-0e0c-43c0-89f2-fdb9a758c841)
-![image](https://github.com/user-attachments/assets/dc315567-d14b-482a-914f-846775c637dc)
-![Uploading image.png…]()
+## 🚀 Demo  
 
 
 
+https://github.com/user-attachments/assets/3c0f93f0-2610-4490-ae67-421916dd9bf6
 
 
+---
 
-## 🛠️ Installation and Setup
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm/yarn
-- Expo CLI (for mobile app)
+## 📸 Project Screenshots  
 
-### Mobile App Setup
-1. Navigate to the app directory
+<table>
+  <tr>
+    <td colspan="2" align="center"><img src="https://github.com/user-attachments/assets/da508fde-8317-4c87-a440-b5f0635a0e56" alt="Main Screen" width="50%"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/8a1ecb2b-9b51-41c2-b8fa-3c01d5868209" alt="Feature 1" width="100%"></td>
+    <td><img src="https://github.com/user-attachments/assets/d54623a4-0e0c-43c0-89f2-fdb9a758c841" alt="Feature 3" width="100%"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/2bda6842-2c91-4bff-8a9c-096336fee3c7" alt="Feature 6" width="100%"></td>
+    <td><img src="https://github.com/user-attachments/assets/077c500d-b466-4f72-a106-a9d9d3c1c308" alt="Feature 5" width="100%"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/881a24d5-701b-43d4-9bbd-973f5f893527" alt="Feature 2" width="100%"></td>
+    <td><img src="https://github.com/user-attachments/assets/dffccd9d-9843-49c4-8412-53125fb62e99" alt="Feature 4" width="100%"></td>
+  </tr>
+</table>
+
+
+## 🛠️ Project Features  
+
+### 🎟️ 1. AI-Powered Event Discovery  
+📌 Personalized event recommendations based on:  
+- **User preferences and past bookings**  
+- **Location proximity and accessibility**  
+- **Trending events & social connections**  
+- **Exploration factor to introduce new experiences**  
+
+✨ **Outcome**:  
+- Users find events they love effortlessly.  
+- AI enhances discovery beyond mainstream events.  
+
+---
+
+### 📊 2. Organizer Intelligence System  
+📈 AI-powered analytics to help event organizers:  
+- **Predict seasonal event trends**  
+- **Analyze ticket sales velocity**  
+- **Optimize dynamic pricing for maximum attendance**  
+- **Identify anomalies in ticket demand**  
+
+✨ **Outcome**:  
+- Organizers make data-driven decisions.  
+- Ticket sales and event attendance increase.  
+
+---
+
+### 🔥 3. Trend Forecasting & Insights  
+🧠 Predictive analytics to forecast:  
+- **Event popularity**  
+- **Market demand**  
+- **User engagement patterns**  
+
+✨ **Outcome**:  
+- Helps users and organizers plan better.  
+- Enhances event scheduling efficiency.  
+
+---
+
+### ✉️ 4. AI-Driven Outreach & Engagement  
+📬 Automates personalized outreach via:  
+- **Email & push notifications**  
+- **Social media recommendations**  
+
+✨ **Outcome**:  
+- Improved user retention.  
+- Increased engagement with personalized content.  
+
+---
+
+## 📥 Installation Steps  
+
+### 1️⃣ Clone the Repo  
 ```bash
-cd app
-```
+git clone https://github.com/MihirRajeshPanchal/TufanTicket
+```  
 
-2. Install dependencies
-```bash
-npm install
-```
 
-3. Start the development server
-```bash
-npx expo start
-```
+### 2️⃣  Run the Project  
 
-### Web Frontend Setup
-1. Navigate to the frontend directory
+#### Frontend  
 ```bash
 cd frontend
-```
+npm i
+npm run dev  
+```  
 
-2. Install dependencies
+#### Backend (FastAPI)  
 ```bash
-npm install
-```
+cd backend
+pip install -r requirements.txt
+uvicorn backend.app:app --reload 
+```  
 
-3. Set up environment variables
+#### React Native Application  
 ```bash
-cp .env.example .env.local
-```
+cd app
+npm i
+npx expo start  
+```  
+---
 
-4. Start the development server
-```bash
-npm run dev
-```
+## 💻 Technologies  
 
-## 🌟 Features
+<p align="center">  
+  <a href="https://skillicons.dev">  
+    <img src="https://skillicons.dev/icons?i=react,nextjs,tailwind,nodejs,fastapi,python,mongodb,vercel,figma,ai&perline=5" />  
+  </a>  
+</p>  
 
-- [List key features of your application]
-- [Feature 1]
-- [Feature 2]
-- [Feature 3]
+---
 
-## 🔧 Configuration
+## 👥 Contributors  
 
-### Environment Variables
+Our amazing team Recursive Depression
+:  
+<p align="start">  
+<a  href="https://github.com/MihirRajeshPanchal/TufanTicket/graphs/contributors">  
+  <img src="https://contrib.rocks/image?repo=MihirRajeshPanchal/TufanTicket" alt="Contributors"/>  
+</a>  
+</p>  
 
-#### Frontend (.env)
-```env
-# Add your required environment variables here
-```
+---
 
-## 📖 Documentation
+<div align="center">  
 
-[Add links to additional documentation if available]
+### ⭐ Show some ❤️ by starring this repository!  
 
-## 🤝 Contributing
+</div>  
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+---
 
-## 📄 License
-
-[Choose and add your license]
-
-## 👥 Team
-
-- [Team member 1]
-- [Team member 2]
-- [Team member 3]
-
-## 📞 Contact
-
-[Add contact information or ways to reach out for support]
-
-## 🙏 Acknowledgments
-
-- [Any acknowledgments or credits]   
+This README is structured as per your template but customized for **TufanTicket**. Let me know if you need further tweaks! 🚀

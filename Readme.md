@@ -14,8 +14,17 @@
 ## 🚀 Demo  
 
 
+<div align="center">
+ 
 
-https://github.com/user-attachments/assets/3c0f93f0-2610-4490-ae67-421916dd9bf6
+
+https://github.com/user-attachments/assets/8179cb25-3cd8-4f8a-911e-0979cc5b900b
+
+
+
+
+</div>
+
 
 
 ---

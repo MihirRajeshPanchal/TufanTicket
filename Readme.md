@@ -161,7 +161,3 @@ Our amazing team Recursive Depression
 ### ⭐ Show some ❤️ by starring this repository!  
 
 </div>  
-
----
-
-This README is structured as per your template but customized for **TufanTicket**. Let me know if you need further tweaks! 🚀
